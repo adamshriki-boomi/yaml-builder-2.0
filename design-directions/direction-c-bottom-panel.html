@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction C — Collapsible Bottom Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --exo-bg: #ffffff;
+    --exo-bg-secondary: #f4f5f7;
+    --exo-bg-tertiary: #e8eaef;
+    --exo-bg-dark: #1e2235;
+    --exo-bg-dark-secondary: #262a3e;
+    --exo-font: #1a1e2e;
+    --exo-font-secondary: #646d82;
+    --exo-border: #dce0e8;
+    --exo-primary: #0052cc;
+    --exo-primary-light: #e6effa;
+    --exo-success: #1b874b;
+    --exo-error: #d93025;
+    --exo-radius: 6px;
+    --exo-radius-sm: 4px;
+    --font-body: 'Source Sans 3', -apple-system, sans-serif;
+    --font-mono: 'Source Code Pro', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    color: var(--exo-font);
+    background: var(--exo-bg);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* === HEADER === */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 44px;
+    border-bottom: 1px solid var(--exo-border);
+    flex-shrink: 0;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .logo {
+    font-weight: 700; font-size: 14px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--exo-primary);
+    border-radius: 2px;
+  }
+
+  .btn {
+    font-family: var(--font-body);
+    font-size: 12px; font-weight: 500;
+    border: 1px solid var(--exo-border);
+    background: var(--exo-bg); color: var(--exo-font);
+    padding: 5px 11px; border-radius: var(--exo-radius-sm);
+    cursor: pointer; transition: all 0.12s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .btn:hover { background: var(--exo-bg-secondary); }
+  .btn-primary { background: var(--exo-primary); color: white; border-color: var(--exo-primary); }
+  .btn-primary:hover { background: #0047b3; }
+  .btn-ghost { border-color: transparent; }
+  .btn-ghost:hover { background: var(--exo-bg-secondary); }
+  .btn-icon {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: transparent;
+    border-radius: var(--exo-radius-sm);
+    cursor: pointer; color: var(--exo-font-secondary);
+    font-size: 14px; transition: all 0.12s;
+  }
+  .btn-icon:hover { background: var(--exo-bg-secondary); color: var(--exo-font); }
+
+  /* === TABS — LEFT-ALIGNED PILL STYLE === */
+  .tab-strip {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 4px;
+    border-bottom: 1px solid var(--exo-border);
+    flex-shrink: 0;
+    background: var(--exo-bg);
+  }
+  .tab-pill {
+    padding: 6px 14px;
+    font-size: 13px; font-weight: 500;
+    color: var(--exo-font-secondary);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.12s;
+  }
+  .tab-pill:hover { color: var(--exo-font); background: var(--exo-bg-secondary); }
+  .tab-pill.active {
+    color: var(--exo-primary);
+    background: var(--exo-primary-light);
+    font-weight: 600;
+  }
+  .tab-separator { width: 1px; height: 20px; background: var(--exo-border); margin: 0 8px; }
+  .tab-actions { margin-left: auto; display: flex; gap: 6px; }
+
+  /* === CONTENT AREA === */
+  .content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+
+  /* === FORM === */
+  .section { margin-bottom: 28px; }
+  .section-title {
+    font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--exo-font-secondary);
+    margin-bottom: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+  .form-row > * { flex: 1; }
+  .form-label {
+    display: block; font-size: 12px; font-weight: 500;
+    color: var(--exo-font-secondary); margin-bottom: 4px;
+  }
+  .form-input {
+    width: 100%; padding: 7px 10px;
+    border: 1px solid var(--exo-border);
+    border-radius: var(--exo-radius-sm);
+    font-family: var(--font-body); font-size: 13px;
+    color: var(--exo-font); background: var(--exo-bg);
+    outline: none; transition: border-color 0.12s;
+  }
+  .form-input:focus { border-color: var(--exo-primary); box-shadow: 0 0 0 2px var(--exo-primary-light); }
+  .form-input::placeholder { color: #b0b5c1; }
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23646d82' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+    padding-right: 30px;
+  }
+  .form-help { font-size: 11px; color: var(--exo-font-secondary); margin-top: 3px; }
+
+  /* Key-value rows */
+  .kv-row {
+    display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px;
+  }
+  .kv-row > div { flex: 1; }
+
+  /* Badge */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.3px; text-transform: uppercase;
+  }
+  .badge-rest { background: #e8f0fe; color: #0052cc; }
+  .badge-loop { background: #f3e8ff; color: #7c3aed; }
+
+  /* Toggle */
+  .toggle-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--exo-font);
+  }
+  .toggle {
+    width: 34px; height: 18px;
+    border-radius: 9px; background: var(--exo-border);
+    position: relative; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle.on { background: var(--exo-primary); }
+  .toggle-knob {
+    width: 14px; height: 14px;
+    border-radius: 50%; background: white;
+    position: absolute; top: 2px; left: 2px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+  .toggle.on .toggle-knob { transform: translateX(16px); }
+
+  /* === BOTTOM PANEL — DARK YAML EDITOR === */
+  .bottom-panel {
+    flex-shrink: 0;
+    border-top: 2px solid var(--exo-border);
+    display: flex;
+    flex-direction: column;
+    height: 240px;
+    background: var(--exo-bg-dark);
+    transition: height 0.3s;
+  }
+  .bottom-panel.collapsed { height: 36px; }
+
+  .panel-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 36px;
+    flex-shrink: 0;
+    cursor: ns-resize;
+    user-select: none;
+    background: var(--exo-bg-dark);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .panel-bar-left { display: flex; align-items: center; gap: 10px; }
+  .panel-bar-right { display: flex; align-items: center; gap: 6px; }
+  .panel-title {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: rgba(255,255,255,0.55);
+  }
+  .panel-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%; background: #34d399;
+  }
+  .panel-btn {
+    font-family: var(--font-body);
+    font-size: 11px; font-weight: 500;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.7);
+    padding: 3px 10px; border-radius: 3px;
+    cursor: pointer; transition: all 0.12s;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .panel-btn:hover { background: rgba(255,255,255,0.12); color: white; }
+  .panel-btn-primary {
+    background: var(--exo-primary); border-color: var(--exo-primary);
+    color: white;
+  }
+  .panel-btn-primary:hover { background: #0047b3; }
+
+  /* Drag handle */
+  .drag-handle {
+    width: 32px; height: 3px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.15);
+    position: absolute; left: 50%; transform: translateX(-50%);
+    top: 4px;
+  }
+
+  .editor-area {
+    flex: 1;
+    overflow: auto;
+    padding: 12px 20px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.85);
+    white-space: pre;
+  }
+  .y-key { color: #6cb6ff; }
+  .y-str { color: #7ee787; }
+  .y-num { color: #f2cc60; }
+  .y-bool { color: #d2a8ff; }
+  .y-comment { color: rgba(255,255,255,0.3); }
+  .line-num {
+    display: inline-block;
+    width: 28px;
+    text-align: right;
+    margin-right: 16px;
+    color: rgba(255,255,255,0.2);
+    user-select: none;
+  }
+
+  .editor-status {
+    padding: 4px 20px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* === DIRECTION LABEL === */
+  .direction-banner {
+    position: fixed; bottom: 20px; right: 20px;
+    background: linear-gradient(135deg, #1e2235, #2c3357);
+    color: white;
+    padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    display: flex; flex-direction: column; gap: 2px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .direction-banner small { font-size: 11px; font-weight: 400; opacity: 0.6; }
+</style>
+</head>
+<body>
+
+<div class="direction-banner">
+  Direction C — Bottom Panel
+  <small>Tabs + dark resizable YAML panel</small>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      YAML Builder
+    </div>
+    <button class="btn btn-ghost" style="font-size:11px">Templates</button>
+  </div>
+  <div class="header-right">
+    <button class="btn btn-ghost" style="font-size:11px">User Stories</button>
+  </div>
+</div>
+
+<!-- TAB STRIP WITH PILL STYLE -->
+<div class="tab-strip">
+  <div class="tab-pill active">Setup</div>
+  <div class="tab-pill">Parameters</div>
+  <div class="tab-pill">Steps</div>
+  <div class="tab-separator"></div>
+  <div class="tab-actions">
+    <button class="btn" style="font-size:11px;padding:4px 10px">+ REST Step</button>
+    <button class="btn" style="font-size:11px;padding:4px 10px">+ Loop Step</button>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content-area">
+  <!-- BASIC CONFIG -->
+  <div class="section">
+    <div class="section-title">Basic Configuration</div>
+    <div class="form-row">
+      <div>
+        <label class="form-label">Connector Name</label>
+        <input class="form-input" value="GitHub API Connector" />
+      </div>
+      <div>
+        <label class="form-label">Base URL</label>
+        <input class="form-input" value="https://api.github.com" />
+        <div class="form-help">Root URL for all API endpoints</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADERS -->
+  <div class="section">
+    <div class="section-title">
+      Default Headers
+      <button class="btn" style="font-size:11px;padding:3px 8px">+ Add</button>
+    </div>
+    <div class="kv-row">
+      <div>
+        <label class="form-label">Name</label>
+        <input class="form-input" value="Content-Type" />
+      </div>
+      <div>
+        <label class="form-label">Value</label>
+        <input class="form-input" value="application/json" />
+      </div>
+      <button class="btn-icon" style="margin-bottom:2px;color:#d93025;font-size:12px">✕</button>
+    </div>
+    <div class="kv-row">
+      <div>
+        <label class="form-label">Name</label>
+        <input class="form-input" value="Accept" />
+      </div>
+      <div>
+        <label class="form-label">Value</label>
+        <input class="form-input" value="application/vnd.github+json" />
+      </div>
+      <button class="btn-icon" style="margin-bottom:2px;color:#d93025;font-size:12px">✕</button>
+    </div>
+  </div>
+
+  <!-- AUTH -->
+  <div class="section">
+    <div class="section-title">Authentication</div>
+    <div class="form-row">
+      <div>
+        <label class="form-label">Auth Type</label>
+        <select class="form-input form-select">
+          <option selected>Bearer Token</option>
+          <option>Basic HTTP</option>
+          <option>API Key</option>
+          <option>OAuth 2.0</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Storage</label>
+        <select class="form-input form-select">
+          <option selected>File System</option>
+          <option>Memory</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Data Format</label>
+        <select class="form-input form-select">
+          <option selected>JSON</option>
+          <option>Text</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM PANEL — DARK YAML EDITOR -->
+<div class="bottom-panel">
+  <div class="panel-bar" style="position:relative">
+    <div class="drag-handle"></div>
+    <div class="panel-bar-left">
+      <div class="panel-dot"></div>
+      <div class="panel-title">YAML Output</div>
+      <span style="font-size:10px;color:rgba(255,255,255,0.3)">— editable, syncs in 1s</span>
+    </div>
+    <div class="panel-bar-right">
+      <button class="panel-btn">▼ Collapse</button>
+      <button class="panel-btn panel-btn-primary">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy
+      </button>
+    </div>
+  </div>
+  <div class="editor-area"><span class="line-num"> 1</span><span class="y-key">connector_name</span>: <span class="y-str">"GitHub API Connector"</span>
+<span class="line-num"> 2</span><span class="y-key">base_url</span>: <span class="y-str">"https://api.github.com"</span>
+<span class="line-num"> 3</span><span class="y-key">default_headers</span>:
+<span class="line-num"> 4</span>  <span class="y-key">Content-Type</span>: <span class="y-str">"application/json"</span>
+<span class="line-num"> 5</span>  <span class="y-key">Accept</span>: <span class="y-str">"application/vnd.github+json"</span>
+<span class="line-num"> 6</span><span class="y-key">auth</span>:
+<span class="line-num"> 7</span>  <span class="y-key">type</span>: <span class="y-str">"bearer"</span>
+<span class="line-num"> 8</span><span class="y-key">variables_metadata</span>:
+<span class="line-num"> 9</span>  <span class="y-key">storage</span>: <span class="y-str">"file_system"</span>
+<span class="line-num">10</span>  <span class="y-key">data_format</span>: <span class="y-str">"json"</span>
+<span class="line-num">11</span><span class="y-key">steps</span>:
+<span class="line-num">12</span>  - <span class="y-key">type</span>: <span class="y-str">"rest"</span>
+<span class="line-num">13</span>    <span class="y-key">name</span>: <span class="y-str">"Get Repositories"</span>
+<span class="line-num">14</span>    <span class="y-key">method</span>: <span class="y-str">"GET"</span>
+<span class="line-num">15</span>    <span class="y-key">endpoint</span>: <span class="y-str">"/user/repos"</span></div>
+  <div class="editor-status">
+    <span>YAML • UTF-8 • 15 lines</span>
+    <span>Last synced: just now</span>
+  </div>
+</div>
+
+</body>
+</html>

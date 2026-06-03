@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option C — Bottom Shortcut Bar</title>
+<style>
+  :root {
+    --exo-bg: #fff; --exo-bg-secondary: #f6f7f9; --exo-bg-tertiary: #eef0f4;
+    --exo-font: #1a1f36; --exo-font-secondary: #6b7280; --exo-border: #d8dce6;
+    --exo-primary: #0052cc; --exo-primary-light: #e6effa; --exo-radius: 4px;
+    --font: 'Segoe UI', -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); color: var(--exo-font); background: var(--exo-bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  .header { display: flex; align-items: center; justify-content: center; height: 48px; border-bottom: 1px solid var(--exo-border); padding: 0 16px; position: relative; }
+  .logo { position: absolute; left: 16px; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+  .logo-mark { width: 22px; height: 22px; background: var(--exo-primary); border-radius: 5px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 700; font-family: monospace; }
+  .top-tabs { display: flex; gap: 4px; }
+  .top-tab { padding: 6px 16px; font-size: 13px; font-weight: 500; border-radius: 6px; cursor: pointer; color: var(--exo-font-secondary); border: none; background: none; }
+  .top-tab.active { background: var(--exo-primary-light); color: var(--exo-primary); font-weight: 600; }
+
+  .main { display: flex; flex: 1; overflow: hidden; }
+  .left { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+  .divider { width: 2px; background: var(--exo-border); }
+  .right { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--exo-bg-secondary); }
+
+  .tab-bar { display: flex; justify-content: center; border-bottom: 2px solid var(--exo-border); padding: 2px 16px 0; gap: 0; }
+  .tab-bar-divider { width: 1px; height: 18px; background: var(--exo-border); align-self: center; }
+  .tab-item { padding: 10px 14px; font-size: 13px; font-weight: 500; color: var(--exo-font-secondary); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .tab-item.active { color: var(--exo-primary); border-bottom-color: var(--exo-primary); font-weight: 600; }
+
+  .content { flex: 1; padding: 20px; overflow-y: auto; color: var(--exo-font-secondary); font-size: 13px; }
+
+  /* Bottom shortcut bar — pinned to bottom of left panel, muted */
+  .template-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-top: 1px solid var(--exo-border);
+    background: var(--exo-bg-tertiary);
+    flex-shrink: 0;
+  }
+  .template-bar-label {
+    font-size: 11px;
+    color: var(--exo-font-secondary);
+    white-space: nowrap;
+  }
+  .template-chips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    flex: 1;
+  }
+  .template-chip {
+    padding: 3px 10px;
+    font-size: 11px;
+    color: var(--exo-font-secondary);
+    border: 1px solid var(--exo-border);
+    border-radius: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    background: var(--exo-bg);
+    transition: all 0.12s;
+  }
+  .template-chip:hover {
+    border-color: var(--exo-primary);
+    color: var(--exo-primary);
+    background: var(--exo-primary-light);
+  }
+
+  .yaml-header { padding: 10px 16px; border-bottom: 1px solid var(--exo-border); background: var(--exo-bg); font-size: 12px; font-weight: 600; color: var(--exo-font-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .yaml-body { flex: 1; padding: 16px; font-family: monospace; font-size: 12px; line-height: 1.7; overflow: auto; }
+
+  .badge { position: fixed; bottom: 20px; right: 20px; background: #059669; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; z-index: 100; box-shadow: 0 4px 16px rgba(5,150,105,0.3); }
+  .badge small { display: block; font-size: 11px; font-weight: 400; opacity: 0.6; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="badge">Option C — Bottom Shortcut Bar<small>Template chips pinned at the bottom of the left panel</small></div>
+
+<div class="header">
+  <div class="logo"><div class="logo-mark">YB</div> YAML Builder</div>
+  <div class="top-tabs">
+    <button class="top-tab active">Editor</button>
+    <button class="top-tab">Test</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="left">
+    <div class="tab-bar">
+      <button class="tab-item active">Connector Configuration</button>
+      <span class="tab-bar-divider"></span>
+      <button class="tab-item">Interface Parameters</button>
+      <span class="tab-bar-divider"></span>
+      <button class="tab-item">Workflow Steps</button>
+    </div>
+    <div class="content">
+      <p>Form content here...</p>
+      <p style="margin-top:12px">The template shortcuts live at the bottom — out of the way, discoverable, optional.</p>
+    </div>
+    <!-- Bottom template shortcut bar — pinned, muted, optional feel -->
+    <div class="template-bar">
+      <span class="template-bar-label">Quick start:</span>
+      <div class="template-chips">
+        <span class="template-chip">Basic Connector</span>
+        <span class="template-chip">Cursor Pagination</span>
+        <span class="template-chip">External Variables</span>
+        <span class="template-chip">Multi-Report</span>
+      </div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="right">
+    <div class="yaml-header">YAML Configuration</div>
+    <div class="yaml-body">
+      <span style="color:#0052cc">connector:</span><br>
+      &nbsp;&nbsp;<span style="color:#0052cc">name:</span> My Connector<br>
+      &nbsp;&nbsp;<span style="color:#0052cc">base_url:</span> https://api.example.com
+    </div>
+  </div>
+</div>
+</body>
+</html>

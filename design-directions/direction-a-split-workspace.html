@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction A — Split Workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --exo-bg: #ffffff;
+    --exo-bg-secondary: #f6f7f9;
+    --exo-bg-tertiary: #ebedf0;
+    --exo-font: #1a1f36;
+    --exo-font-secondary: #5e6578;
+    --exo-border: #d8dce6;
+    --exo-primary: #0052cc;
+    --exo-primary-light: #e6effa;
+    --exo-success: #1b874b;
+    --exo-error: #d93025;
+    --exo-warning: #e8a100;
+    --exo-badge-blue: #0052cc;
+    --exo-badge-navy: #2c3357;
+    --exo-badge-green: #1b874b;
+    --exo-badge-purple: #6b5ce7;
+    --exo-radius: 6px;
+    --exo-radius-sm: 4px;
+    --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    color: var(--exo-font);
+    background: var(--exo-bg);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* === HEADER === */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--exo-border);
+    flex-shrink: 0;
+    background: var(--exo-bg);
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .logo {
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.3px;
+    color: var(--exo-font);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-icon {
+    width: 24px; height: 24px;
+    background: var(--exo-primary);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 700;
+  }
+
+  /* === BUTTONS === */
+  .btn {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--exo-border);
+    background: var(--exo-bg);
+    color: var(--exo-font);
+    padding: 6px 14px;
+    border-radius: var(--exo-radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { background: var(--exo-bg-secondary); }
+  .btn-primary {
+    background: var(--exo-primary);
+    color: white;
+    border-color: var(--exo-primary);
+  }
+  .btn-primary:hover { background: #0047b3; }
+  .btn-ghost { border-color: transparent; }
+  .btn-ghost:hover { background: var(--exo-bg-secondary); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* === MAIN LAYOUT — SPLIT === */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  .panel-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .panel-right {
+    width: 42%;
+    min-width: 320px;
+    border-left: 1px solid var(--exo-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--exo-bg-secondary);
+  }
+
+  /* Resizer */
+  .resizer {
+    width: 4px;
+    cursor: col-resize;
+    background: transparent;
+    transition: background 0.15s;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .resizer:hover, .resizer.active {
+    background: var(--exo-primary);
+  }
+  .resizer::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px; height: 32px;
+    border-radius: 1px;
+    background: var(--exo-border);
+    transition: background 0.15s;
+  }
+  .resizer:hover::after { background: white; }
+
+  /* === TABS === */
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid var(--exo-bg-tertiary);
+    padding: 0 20px;
+    flex-shrink: 0;
+    background: var(--exo-bg);
+  }
+  .tab {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--exo-font-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--exo-font); }
+  .tab.active {
+    color: var(--exo-primary);
+    border-bottom-color: var(--exo-primary);
+    font-weight: 600;
+  }
+
+  /* === TAB CONTENT === */
+  .tab-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  /* === FORM ELEMENTS === */
+  .form-section { margin-bottom: 28px; }
+  .form-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .form-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--exo-font);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+  .form-row > * { flex: 1; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--exo-font-secondary);
+    margin-bottom: 5px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--exo-border);
+    border-radius: var(--exo-radius-sm);
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--exo-font);
+    background: var(--exo-bg);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--exo-primary); box-shadow: 0 0 0 2px var(--exo-primary-light); }
+  .form-input::placeholder { color: #a0a7b8; }
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%235e6578' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .form-help {
+    font-size: 11px;
+    color: var(--exo-font-secondary);
+    margin-top: 4px;
+  }
+
+  /* === HEADER ROW (key-value) === */
+  .kv-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    margin-bottom: 8px;
+  }
+  .kv-row > .form-group { flex: 1; margin-bottom: 0; }
+  .btn-icon {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--exo-border);
+    background: var(--exo-bg);
+    border-radius: var(--exo-radius-sm);
+    cursor: pointer;
+    color: var(--exo-font-secondary);
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-icon:hover { background: #fef2f2; color: var(--exo-error); border-color: #fca5a5; }
+  .btn-icon.add:hover { background: var(--exo-primary-light); color: var(--exo-primary); border-color: var(--exo-primary); }
+
+  /* === YAML EDITOR === */
+  .editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--exo-border);
+    background: var(--exo-bg);
+    flex-shrink: 0;
+  }
+  .editor-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--exo-font-secondary);
+  }
+  .editor-body {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--exo-font);
+    white-space: pre;
+  }
+  .editor-footer {
+    padding: 8px 16px;
+    font-size: 11px;
+    color: var(--exo-font-secondary);
+    border-top: 1px solid var(--exo-border);
+    background: var(--exo-bg);
+    flex-shrink: 0;
+  }
+  .yaml-key { color: #0052cc; }
+  .yaml-string { color: #1b874b; }
+  .yaml-number { color: #b86e00; }
+  .yaml-bool { color: #6b5ce7; }
+  .yaml-comment { color: #a0a7b8; font-style: italic; }
+
+  /* === BADGE === */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .badge-blue { background: #e6effa; color: var(--exo-badge-blue); }
+  .badge-navy { background: #ebedf4; color: var(--exo-badge-navy); }
+  .badge-green { background: #e6f4ec; color: var(--exo-badge-green); }
+
+  /* === SYNC INDICATOR === */
+  .sync-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--exo-success);
+    display: inline-block;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* === TOGGLE === */
+  .toggle-track {
+    width: 36px; height: 20px;
+    border-radius: 10px;
+    background: var(--exo-border);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-track.on { background: var(--exo-primary); }
+  .toggle-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: white;
+    position: absolute;
+    top: 2px; left: 2px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+  .toggle-track.on .toggle-thumb { transform: translateX(16px); }
+
+  /* === DIRECTION LABEL === */
+  .direction-banner {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--exo-badge-navy);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .direction-banner small {
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+
+<!-- DIRECTION BANNER -->
+<div class="direction-banner">
+  Direction A — Split Workspace
+  <small>Side-by-side tabs + persistent YAML editor</small>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">
+      <div class="logo-icon">Y</div>
+      YAML Builder
+    </div>
+    <button class="btn btn-sm">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Templates
+    </button>
+  </div>
+  <div class="header-right">
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--exo-font-secondary)">
+      <span class="sync-dot"></span> Synced
+    </div>
+    <button class="btn btn-sm btn-ghost">User Stories</button>
+  </div>
+</div>
+
+<!-- MAIN SPLIT LAYOUT -->
+<div class="main">
+  <!-- LEFT: TABS + FORMS -->
+  <div class="panel-left">
+    <div class="tabs">
+      <div class="tab active">Setup</div>
+      <div class="tab">Parameters</div>
+      <div class="tab">Steps</div>
+    </div>
+    <div class="tab-content">
+      <!-- BASIC CONFIG -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="form-section-title">Basic Configuration</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Connector Name</label>
+            <input class="form-input" value="GitHub API Connector" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Base URL</label>
+          <input class="form-input" value="https://api.github.com" />
+          <div class="form-help">Root URL for all API endpoints</div>
+        </div>
+      </div>
+
+      <!-- HEADERS -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="form-section-title">Default Headers</div>
+          <button class="btn btn-sm">+ Add Header</button>
+        </div>
+        <div class="kv-row">
+          <div class="form-group">
+            <label class="form-label">Name</label>
+            <input class="form-input" value="Content-Type" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Value</label>
+            <input class="form-input" value="application/json" />
+          </div>
+          <button class="btn-icon">✕</button>
+        </div>
+        <div class="kv-row">
+          <div class="form-group">
+            <label class="form-label">Name</label>
+            <input class="form-input" value="Accept" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Value</label>
+            <input class="form-input" value="application/vnd.github+json" />
+          </div>
+          <button class="btn-icon">✕</button>
+        </div>
+      </div>
+
+      <!-- AUTH -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="form-section-title">Authentication</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Auth Type</label>
+          <select class="form-input form-select">
+            <option selected>Bearer Token</option>
+            <option>Basic HTTP</option>
+            <option>API Key</option>
+            <option>OAuth 2.0</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- VARIABLES -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="form-section-title">Variables Metadata</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Storage</label>
+            <select class="form-input form-select">
+              <option selected>File System</option>
+              <option>Memory</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data Format</label>
+            <select class="form-input form-select">
+              <option selected>JSON</option>
+              <option>Text</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESIZER -->
+  <div class="resizer"></div>
+
+  <!-- RIGHT: YAML EDITOR -->
+  <div class="panel-right">
+    <div class="editor-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="editor-title">YAML Output</div>
+        <span class="badge badge-green" style="font-size:10px">Live</span>
+      </div>
+      <button class="btn btn-sm btn-primary">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy YAML
+      </button>
+    </div>
+    <div class="editor-body"><span class="yaml-key">connector_name</span>: <span class="yaml-string">"GitHub API Connector"</span>
+<span class="yaml-key">base_url</span>: <span class="yaml-string">"https://api.github.com"</span>
+<span class="yaml-key">default_headers</span>:
+  <span class="yaml-key">Content-Type</span>: <span class="yaml-string">"application/json"</span>
+  <span class="yaml-key">Accept</span>: <span class="yaml-string">"application/vnd.github+json"</span>
+<span class="yaml-key">auth</span>:
+  <span class="yaml-key">type</span>: <span class="yaml-string">"bearer"</span>
+<span class="yaml-key">variables_metadata</span>:
+  <span class="yaml-key">storage</span>: <span class="yaml-string">"file_system"</span>
+  <span class="yaml-key">data_format</span>: <span class="yaml-string">"json"</span>
+<span class="yaml-key">steps</span>:
+  - <span class="yaml-key">type</span>: <span class="yaml-string">"rest"</span>
+    <span class="yaml-key">name</span>: <span class="yaml-string">"Get Repositories"</span>
+    <span class="yaml-key">method</span>: <span class="yaml-string">"GET"</span>
+    <span class="yaml-key">endpoint</span>: <span class="yaml-string">"/user/repos"</span>
+    <span class="yaml-key">pagination</span>:
+      <span class="yaml-key">type</span>: <span class="yaml-string">"page"</span>
+      <span class="yaml-key">page_param_name</span>: <span class="yaml-string">"page"</span>
+      <span class="yaml-key">page_size_param_name</span>: <span class="yaml-string">"per_page"</span>
+      <span class="yaml-key">start_value</span>: <span class="yaml-number">1</span>
+      <span class="yaml-key">increment</span>: <span class="yaml-number">1</span>
+    <span class="yaml-key">variables_output</span>:
+      - <span class="yaml-key">variable_name</span>: <span class="yaml-string">"repos"</span>
+        <span class="yaml-key">response_location</span>: <span class="yaml-string">"data"</span>
+        <span class="yaml-key">json_path</span>: <span class="yaml-string">"$"</span>
+        <span class="yaml-key">format</span>: <span class="yaml-string">"json"</span></div>
+    <div class="editor-footer">
+      Edit directly — changes sync to UI after 1 second
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

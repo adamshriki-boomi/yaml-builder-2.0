@@ -1,0 +1,792 @@
+:root {
+  font-family: var(--exo-font-family);
+  color: var(--exo-color-font);
+  background-color: var(--exo-color-page);
+}
+
+html, body {
+  background-color: var(--exo-color-page);
+  color: var(--exo-color-font);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ==============================
+   APP SHELL
+   ============================== */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ==============================
+   EDITOR TOOLBAR
+   ============================== */
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  padding: var(--exo-spacing-x-small);
+  border-bottom: 1px solid var(--exo-color-border-secondary);
+  background: var(--exo-color-background);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: var(--exo-spacing-3x-small);
+}
+
+.editor-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: var(--exo-spacing-3x-small);
+}
+
+.editor-toolbar-divider {
+  width: 1px;
+  height: var(--exo-spacing-large);
+  background: var(--exo-color-border);
+  margin: 0 var(--exo-spacing-2x-small);
+  flex-shrink: 0;
+}
+
+/* ==============================
+   BODY LAYOUT
+   ============================== */
+
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.app-body--row {
+  flex-direction: row;
+}
+
+.app-body--column {
+  flex-direction: column;
+}
+
+.app-form-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ==============================
+   TAB BAR
+   ============================== */
+
+.tab-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--exo-color-background);
+  border-bottom: 1px solid var(--exo-color-border);
+  padding: var(--exo-spacing-2x-small) var(--exo-spacing-standard) 0;
+}
+
+.tab-bar ex-tab {
+  --exo-component-tab-gap: var(--exo-spacing-large);
+}
+
+/* ==============================
+   TAB CONTENT
+   ============================== */
+
+.tab-content {
+  flex: 1 1 0%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--exo-spacing-medium) var(--exo-spacing-medium) var(--exo-spacing-x-large);
+  min-height: 0;
+}
+
+/* ==============================
+   YAML SIDE PANEL (wide mode)
+   ============================== */
+
+.yaml-side-panel {
+  min-width: 15.625rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid var(--exo-color-border);
+}
+
+.app-form-column + ex-resize-handle,
+ex-resize-handle + .yaml-side-panel {
+  /* Make the ExResizeHandle area itself visible by giving it a flanking line */
+  border-left-color: var(--exo-color-border);
+}
+
+/* ==============================
+   YAML BOTTOM PANEL (narrow mode)
+   ============================== */
+
+.yaml-bottom-panel {
+  border-top: var(--exo-spacing-3x-small) solid var(--exo-color-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.yaml-bottom-handle {
+  height: var(--exo-spacing-x-small);
+  cursor: ns-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--exo-color-background-secondary);
+  flex-shrink: 0;
+}
+
+.yaml-bottom-handle:hover {
+  background: var(--exo-color-background-tertiary);
+}
+
+.yaml-bottom-handle-bar {
+  width: var(--exo-spacing-x-large);
+  height: 0.1875rem;
+  border-radius: var(--exo-radius-small);
+  background: var(--exo-color-border);
+}
+
+/* ==============================
+   FORM ELEMENTS
+   ============================== */
+
+/* ==============================
+   TEST PANEL
+   ============================== */
+
+.test-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.test-panel-title {
+  font-size: var(--exo-font-size-x-small);
+  font-weight: 600;
+  margin-left: var(--exo-spacing-2x-small);
+}
+
+.test-panel-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--exo-spacing-x-large);
+  overflow-y: auto;
+}
+
+/* Empty state: center the empty placeholder both axes */
+.test-panel-body:not(.test-panel-body--content) {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.test-panel-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--exo-spacing-standard);
+  flex: 1;
+}
+
+.test-panel-loading-text {
+  font-size: var(--exo-font-size-small);
+  color: var(--exo-color-font-secondary);
+}
+
+/* Content-mode layout for the test panel (form / running / results phases) */
+.test-panel-body--content {
+  align-items: stretch;
+  text-align: left;
+}
+
+.test-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--exo-spacing-standard);
+  padding-bottom: var(--exo-spacing-x-large);
+}
+
+.test-panel-intro {
+  font-size: var(--exo-font-size-small);
+  color: var(--exo-color-font-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.test-panel-fields {
+  display: flex;
+  flex-direction: column;
+}
+
+.test-panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--exo-spacing-small);
+  padding-top: var(--exo-spacing-medium);
+  margin-top: var(--exo-spacing-small);
+  border-top: 1px solid var(--exo-color-border-secondary);
+}
+
+.test-results-banner {
+  /* Banner is the visual anchor for results — no extra spacing chrome needed */
+}
+
+.test-results-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--exo-spacing-small);
+  flex-wrap: wrap;
+  margin-top: var(--exo-spacing-small);
+  margin-bottom: var(--exo-spacing-x-small);
+}
+
+/* Per-row status emphasis — colored left border tints status without overriding Exosphere chrome */
+.report-row {
+  border-left: var(--exo-spacing-3x-small) solid transparent;
+  border-radius: var(--exo-spacing-2x-small);
+  margin-bottom: var(--exo-spacing-2x-small);
+  background: var(--exo-color-background);
+}
+
+/* Status icon rendered in light DOM (next to the accordion-item) so we can
+   reliably color it via --exo-component-icon-color. The leadingIcon attribute
+   renders the icon inside the accordion's shadow DOM where its :host resets
+   that variable to initial, blocking external overrides. */
+.report-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--exo-spacing-x-small);
+}
+
+.report-row > ex-accordion-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.report-row-status-icon {
+  display: flex;
+  align-items: center;
+  padding-left: var(--exo-spacing-x-small);
+  flex-shrink: 0;
+}
+
+.report-row--passed {
+  border-left-color: var(--exo-color-background-success-strong);
+}
+
+.report-row--passed .report-row-status-icon ex-icon {
+  --exo-component-icon-color: var(--exo-color-font-success);
+}
+
+.report-row--failed {
+  border-left-color: var(--exo-color-border-danger-strong);
+}
+
+.report-row--failed .report-row-status-icon ex-icon {
+  --exo-component-icon-color: var(--exo-color-font-danger);
+}
+
+.report-result-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--exo-spacing-small);
+  padding: var(--exo-spacing-x-small) 0;
+}
+
+.report-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--exo-spacing-small);
+  flex-wrap: wrap;
+}
+
+.report-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--exo-spacing-2x-small);
+  flex-wrap: wrap;
+}
+
+.report-section-label {
+  font-size: var(--exo-font-size-x-small);
+  font-weight: 600;
+  color: var(--exo-color-font-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: var(--exo-spacing-x-small);
+  display: flex;
+  align-items: baseline;
+  gap: var(--exo-spacing-x-small);
+}
+
+.report-section-label-aux {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+  color: var(--exo-color-font-tertiary);
+}
+
+.report-error {
+  margin-top: var(--exo-spacing-x-small);
+}
+
+.raw-response {
+  font-family: var(--exo-font-family-mono, ui-monospace, Menlo, monospace);
+  font-size: var(--exo-font-size-x-small);
+  color: var(--exo-color-font);
+  background: var(--exo-color-surface-secondary);
+  padding: var(--exo-spacing-small);
+  border-radius: var(--exo-spacing-2x-small);
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ==============================
+   FORM ELEMENTS
+   ============================== */
+
+/* Vertical rhythm between sibling top-level collapsible sections (Pre-Run, Multi-Reports, Post-Run, etc.) */
+ex-accordion + ex-accordion {
+  margin-top: var(--exo-spacing-medium);
+}
+
+.form-section {
+  margin-bottom: var(--exo-spacing-large);
+}
+
+.form-section-title {
+  font-size: var(--exo-font-size-small);
+  font-weight: 600;
+  margin-top: var(--exo-spacing-medium);
+  margin-bottom: var(--exo-spacing-small);
+  color: var(--exo-color-font);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-section-title--inline {
+  font-size: var(--exo-font-size-x-small);
+  margin-top: var(--exo-spacing-small);
+}
+
+.form-row {
+  display: flex;
+  gap: var(--exo-spacing-small);
+  margin-bottom: var(--exo-spacing-small);
+}
+
+.form-row > * {
+  flex: 1;
+}
+
+/* Fixed-width method-select cell in REST step form */
+.form-method-cell {
+  flex: 0 0 8.125rem;
+}
+
+.form-field {
+  margin-bottom: var(--exo-spacing-small);
+}
+
+.form-helper-text {
+  color: var(--exo-color-font-secondary);
+  font-size: var(--exo-font-size-x-small);
+  margin-bottom: var(--exo-spacing-medium);
+}
+
+.form-toolbar {
+  margin-top: var(--exo-spacing-x-small);
+}
+
+.form-button-row {
+  display: flex;
+  gap: var(--exo-spacing-x-small);
+  margin-top: var(--exo-spacing-x-small);
+}
+
+/* Indented sub-section (used for OAuth, pagination details, etc.) */
+.form-indent {
+  padding-left: var(--exo-spacing-standard);
+  border-left: var(--exo-spacing-3x-small) solid var(--exo-color-border);
+}
+
+.form-indent--top {
+  margin-top: var(--exo-spacing-x-small);
+}
+
+/* Inline toggle + label row */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--exo-spacing-x-small);
+  margin-top: var(--exo-spacing-x-small);
+}
+
+.toggle-row--padded {
+  padding-top: var(--exo-spacing-medium);
+  margin-top: 0;
+}
+
+.toggle-row--inline {
+  margin-top: 0;
+}
+
+.toggle-row-group {
+  display: flex;
+  gap: var(--exo-spacing-large);
+  margin-bottom: var(--exo-spacing-standard);
+}
+
+.sub-card--lg {
+  padding: var(--exo-spacing-small);
+  margin-bottom: var(--exo-spacing-small);
+}
+
+.sub-card-label--strong {
+  font-size: var(--exo-font-size-micro);
+  color: var(--exo-color-font);
+}
+
+/* ==============================
+   EMPTY STATE WRAPPER
+   ============================== */
+
+/* ExEmptyState centers its own content but is not block-level by default.
+   Wrap with this class to give it a full-width centered placement. */
+.empty-state-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--exo-spacing-2x-large) var(--exo-spacing-large);
+  width: 100%;
+}
+
+/* ==============================
+   CARDS (ExCard-based) + helpers
+   ============================== */
+
+/* Spacing between sibling cards in a list */
+.app-list-card {
+  display: block;
+  margin-bottom: var(--exo-spacing-small);
+}
+
+/* Generic header-row layout used inside ExCard slot="header" or as inline groups */
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: var(--exo-spacing-x-small);
+}
+
+.card-row--between {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.card-row--clickable {
+  cursor: pointer;
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: var(--exo-font-size-x-small);
+}
+
+.card-meta {
+  font-size: var(--exo-font-size-micro);
+  color: var(--exo-color-font-secondary);
+}
+
+.card-actions {
+  display: flex;
+  gap: var(--exo-spacing-small);
+}
+
+/* Compact bordered sub-card (nested step, transformation layer, metadata entry, report parameter).
+   Custom token-styled extension — see EXOSPHERE-CUSTOM.md.
+   ExCard's default body padding is too heavy for 3-4 level nested groups. */
+.sub-card {
+  padding: var(--exo-spacing-small);
+  margin-bottom: var(--exo-spacing-x-small);
+  border: 1px solid var(--exo-color-border);
+  border-radius: var(--exo-radius-standard);
+  background: var(--exo-color-background);
+}
+
+.sub-card--dashed {
+  border-style: dashed;
+}
+
+.sub-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--exo-spacing-x-small);
+}
+
+.sub-card-header--end {
+  justify-content: flex-end;
+}
+
+.sub-card-label {
+  font-size: var(--exo-font-size-x-micro);
+  color: var(--exo-color-font-secondary);
+  font-weight: 600;
+}
+
+/* ==============================
+   YAML EDITOR SHELL
+   ============================== */
+
+.yaml-editor-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.yaml-editor-banner {
+  padding: var(--exo-spacing-2x-small) var(--exo-spacing-standard);
+}
+
+.yaml-editor-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.yaml-editor-footer {
+  padding: var(--exo-spacing-x-small) var(--exo-spacing-standard);
+  border-top: 1px solid var(--exo-color-border);
+  font-size: var(--exo-font-size-x-micro);
+  color: var(--exo-color-font-secondary);
+}
+
+/* ==============================
+   CODEMIRROR THEMING
+   ============================== */
+
+.cm-editor {
+  height: 100%;
+  font-size: var(--exo-font-size-x-small);
+  border: none;
+  background-color: var(--exo-color-background);
+  color: var(--exo-color-font);
+}
+
+.cm-editor .cm-content {
+  color: var(--exo-color-font);
+  caret-color: var(--exo-color-font);
+}
+
+.cm-editor.cm-focused {
+  outline: none;
+}
+
+.cm-gutters {
+  background: var(--exo-color-background-secondary) !important;
+  border-right: 1px solid var(--exo-color-border) !important;
+  color: var(--exo-color-font-secondary) !important;
+}
+
+.cm-activeLineGutter,
+.cm-activeLine {
+  background-color: var(--exo-color-background-secondary) !important;
+}
+
+.cm-selectionBackground {
+  background-color: var(--exo-color-background-selected-weak) !important;
+}
+
+.ex-theme-dark .cm-cursor {
+  border-left-color: var(--exo-color-font) !important;
+}
+
+/* ==============================
+   TEMPLATE DRAWER (ExAccordion at bottom of form column)
+   ============================== */
+
+.template-drawer-host {
+  flex-shrink: 0;
+  border-top: 1px solid var(--exo-color-border);
+  /* Cap accordion content so it never dominates the form column */
+  --exo-component-accordion-content-max-height: 50vh;
+}
+
+.template-drawer-host ex-accordion-item {
+  /* Make the body scrollable when content is taller than the cap */
+  overflow: auto;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(18.75rem, 100%), 1fr));
+  gap: var(--exo-spacing-small);
+  padding: var(--exo-spacing-standard);
+}
+
+.template-tile-desc {
+  font-size: var(--exo-font-size-x-small);
+  color: var(--exo-color-font-secondary);
+  margin: 0;
+}
+
+.template-tile-tags {
+  display: flex;
+  flex-direction: row;
+  gap: var(--exo-spacing-2x-small);
+  flex-wrap: wrap;
+}
+
+/* ==============================
+   DIALOG SHARED
+   ============================== */
+
+.dialog-body-text {
+  font-size: var(--exo-font-size-small);
+  color: var(--exo-color-font);
+}
+
+.dialog-footer-actions {
+  display: flex;
+  gap: var(--exo-spacing-x-small);
+  justify-content: flex-end;
+}
+
+/* ==============================
+   USER STORIES PAGE
+   ============================== */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  padding: var(--exo-spacing-small) var(--exo-spacing-standard);
+  border-bottom: 1px solid var(--exo-color-border);
+  background: var(--exo-color-background);
+  flex-shrink: 0;
+}
+
+.app-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--exo-spacing-small);
+}
+
+.user-stories-title {
+  font-weight: 600;
+  font-size: var(--exo-font-size-medium);
+}
+
+.user-stories-page {
+  flex: 1;
+  overflow: auto;
+  padding: var(--exo-spacing-large);
+}
+
+.user-stories-container {
+  max-width: 56.25rem;
+  margin: 0 auto;
+}
+
+.user-stories-intro {
+  font-size: var(--exo-font-size-small);
+  color: var(--exo-color-font-secondary);
+  margin-bottom: var(--exo-spacing-large);
+  line-height: 1.6;
+}
+
+.user-stories-epic {
+  margin-bottom: var(--exo-spacing-x-large);
+}
+
+.user-stories-epic-header {
+  display: flex;
+  align-items: center;
+  gap: var(--exo-spacing-small);
+  margin-bottom: var(--exo-spacing-standard);
+  padding-bottom: var(--exo-spacing-x-small);
+  border-bottom: var(--exo-spacing-3x-small) solid var(--exo-color-border);
+}
+
+.user-stories-epic-name {
+  font-weight: 700;
+  font-size: var(--exo-font-size-small);
+}
+
+.user-stories-epic-desc {
+  font-size: var(--exo-font-size-x-small);
+  color: var(--exo-color-font-secondary);
+}
+
+.user-stories-story {
+  padding: var(--exo-spacing-standard);
+  margin-bottom: var(--exo-spacing-small);
+  border: 1px solid var(--exo-color-border);
+  border-radius: var(--exo-radius-standard);
+  border-left-width: var(--exo-spacing-3x-small);
+  border-left-style: solid;
+}
+
+.user-stories-story-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--exo-spacing-small);
+  margin-bottom: var(--exo-spacing-x-small);
+}
+
+.user-stories-story-text {
+  font-size: var(--exo-font-size-small);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.user-stories-criteria {
+  margin-left: 3.25rem;
+}
+
+.user-stories-criteria-label {
+  font-size: var(--exo-font-size-micro);
+  font-weight: 600;
+  color: var(--exo-color-font-secondary);
+  margin-bottom: var(--exo-spacing-2x-small);
+}
+
+.user-stories-criteria-list {
+  font-size: var(--exo-font-size-x-small);
+  color: var(--exo-color-font-secondary);
+  padding-left: var(--exo-spacing-standard);
+  line-height: 1.6;
+  margin: 0;
+}
