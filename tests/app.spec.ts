@@ -23,22 +23,6 @@ async function expandAccordion(page: Page, labelPrefix: string) {
   }, labelPrefix);
 }
 
-async function clickConfirmInDialog(page: Page) {
-  // Click the Confirm ExButton inside the active dialog. ExButton dispatches a click
-  // event from its host element on user click; we mimic that here.
-  const handle = await page.evaluateHandle(() => {
-    const dialog = document.querySelector('ex-dialog');
-    if (!dialog) return null;
-    const buttons = dialog.querySelectorAll('ex-button');
-    for (const btn of buttons) {
-      if (btn.textContent?.includes('Confirm')) return btn;
-    }
-    return null;
-  });
-  const el = handle.asElement();
-  if (el) await el.click();
-}
-
 // ============================================================================
 // Tab navigation and content
 // ============================================================================
@@ -142,76 +126,8 @@ test.describe('YAML Editor', () => {
 // ============================================================================
 // Templates
 // ============================================================================
-
-test.describe('Templates', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(1500);
-  });
-
-  test('Template drawer shows all template options when expanded', async ({ page }) => {
-    // Trigger is the accordion-item header at the bottom of the form column
-    const trigger = page.locator('.template-drawer-host ex-accordion-item');
-    await trigger.click();
-    await page.waitForTimeout(500);
-
-    const tiles = page.locator('.template-drawer-host ex-tile');
-    await expect(tiles).toHaveCount(4);
-
-    const titles = await tiles.evaluateAll((els: any[]) => els.map(el => el.title));
-    expect(titles).toContain('Basic Connector');
-    expect(titles).toContain('Cursor Pagination');
-    expect(titles).toContain('External Variables Loop');
-    expect(titles).toContain('Multi-Report Blueprint');
-  });
-
-  test('Selecting a template shows confirmation then populates YAML', async ({ page }) => {
-    const trigger = page.locator('.template-drawer-host ex-accordion-item');
-    await trigger.click();
-    await page.waitForTimeout(500);
-
-    // Basic Connector is the first tile (titles are in shadow DOM, can't filter by hasText)
-    const tiles = page.locator('.template-drawer-host ex-tile');
-    await tiles.first().click();
-    await page.waitForTimeout(500);
-
-    await expect(page.locator('ex-dialog')).toHaveCount(1);
-
-    await clickConfirmInDialog(page);
-    await page.waitForTimeout(2000);
-
-    const cmText = await page.evaluate(() => {
-      const cmLines = document.querySelectorAll('.cm-line');
-      return Array.from(cmLines).map(l => l.textContent).join('\n');
-    });
-    expect(cmText.length).toBeGreaterThan(50);
-  });
-
-  test('Multi-Report Blueprint template populates all sections', async ({ page }) => {
-    const trigger = page.locator('.template-drawer-host ex-accordion-item');
-    await trigger.click();
-    await page.waitForTimeout(500);
-
-    // Multi-Report Blueprint is index 3 (Basic, Cursor, External, Multi-Report order)
-    const tiles = page.locator('.template-drawer-host ex-tile');
-    await tiles.nth(3).click();
-    await page.waitForTimeout(500);
-
-    await clickConfirmInDialog(page);
-    await page.waitForTimeout(2000);
-
-    await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
-    await page.waitForTimeout(500);
-
-    // Multi-Reports accordion item label should include the report count
-    const labels = await page.locator('.tab-content ex-accordion-item').evaluateAll(
-      (els: any[]) => els.map(el => el.label)
-    );
-    const multiReportsLabel = labels.find(l => l.startsWith('Multi-Reports'));
-    expect(multiReportsLabel).toBeTruthy();
-    expect(multiReportsLabel).toContain('5');
-  });
-});
+// The template drawer was replaced by the AI chat agent in 2.0.
+// Chat behaviour (including seeding from templates) is covered in chat-agent.spec.ts.
 
 // ============================================================================
 // Connector Configuration interactions

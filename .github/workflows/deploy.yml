@@ -28,6 +28,11 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+        env:
+          # Set these as repo secrets (Settings → Secrets and variables → Actions).
+          # The anon key is public by design; the Anthropic key lives only in the Supabase function.
+          VITE_SUPABASE_FUNCTION_URL: ${{ secrets.VITE_SUPABASE_FUNCTION_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -13,7 +13,8 @@ import ParameterList from './components/Parameters/ParameterList';
 import StepList from './components/Steps/StepList';
 import YamlEditor from './components/Editor/YamlEditor';
 import TestPanel from './components/Test/TestPanel';
-import TemplateDrawer from './components/Templates/TemplateDrawer';
+import ChatPanel from './components/Chat/ChatPanel';
+import { ChatProvider } from './chat/ChatContext';
 
 const YAML_SIDE_PANEL_ID = 'yaml-side-panel';
 const SIDE_PANEL_MIN_WIDTH_PX = 240;
@@ -115,7 +116,7 @@ function AppContent() {
             <div className="tab-content">
               <TabContent activeTab={activeTab} />
             </div>
-            <TemplateDrawer />
+            <ChatPanel />
           </div>
           <ExResizeHandle
             targetId={YAML_SIDE_PANEL_ID}
@@ -143,7 +144,7 @@ function AppContent() {
           <div className="tab-content">
             <TabContent activeTab={activeTab} />
           </div>
-          <TemplateDrawer />
+          <ChatPanel />
         </div>
         {isBottomPanelOpen && (
           <div className="yaml-bottom-panel" style={{ height: bottomPanelHeight }}>
@@ -166,7 +167,9 @@ function AppContent() {
 function App() {
   return (
     <ConnectorProvider>
-      <AppContent />
+      <ChatProvider>
+        <AppContent />
+      </ChatProvider>
     </ConnectorProvider>
   );
 }

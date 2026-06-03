@@ -1,3 +1,57 @@
+# YAML Builder 2.0
+
+A Vite + React + TypeScript app (built on Boomi's Exosphere design system) for authoring Boomi REST
+API connector blueprints as YAML, with a live two-way editor and an **AI chat agent**.
+
+## AI Chat Agent
+
+The bottom panel of the left column is a conversational assistant that helps you create, edit, and
+validate the connector YAML. It proposes a complete updated configuration; you click **Apply to
+editor** to accept it (review & approve — nothing changes until you apply).
+
+### Architecture
+
+The frontend is a static SPA, so the Anthropic API key must never ship to the browser. A **Supabase
+Edge Function** (`supabase/functions/chat-proxy`) holds the key as a server-side secret and streams
+Claude's response back to the app.
+
+```
+Chat UI → Supabase Edge Function (holds ANTHROPIC_API_KEY) → Anthropic Messages API (Claude)
+```
+
+### Setup
+
+> Prerequisites: the [Supabase CLI](https://supabase.com/docs/guides/cli) and a Supabase project.
+> Run `supabase init` once in this repo (creates `supabase/config.toml`), and `supabase link` before deploying.
+
+1. **Server secret** — set your Anthropic key on the function. For local dev, copy
+   `supabase/functions/.env.example` → `supabase/functions/.env` and fill in `ANTHROPIC_API_KEY`
+   (model defaults to `claude-opus-4-8`). For production: `supabase secrets set ANTHROPIC_API_KEY=…`.
+2. **Frontend env** — copy `.env.example` → `.env.local` and set:
+   - `VITE_SUPABASE_FUNCTION_URL` — e.g. `http://localhost:54321/functions/v1/chat-proxy` locally, or
+     `https://<project-ref>.supabase.co/functions/v1/chat-proxy` in production.
+   - `VITE_SUPABASE_ANON_KEY` — the Supabase anon (public) key.
+3. **Run it locally**:
+   ```bash
+   supabase functions serve chat-proxy --env-file supabase/functions/.env   # terminal 1
+   npm run dev                                                               # terminal 2
+   ```
+4. **Deploy** — `supabase functions deploy chat-proxy`, then add `VITE_SUPABASE_FUNCTION_URL` and
+   `VITE_SUPABASE_ANON_KEY` as GitHub Actions repo secrets (the deploy workflow injects them at build
+   time). The anon key is public by design; the Anthropic key stays in the function.
+
+If the frontend env vars aren't set, the app loads normally and the chat shows a "not configured"
+notice instead of calling out.
+
+### Tests
+
+`tests/chat-agent.spec.ts` mocks the Edge Function with a canned stream and verifies the panel,
+quick-start chips, resize, and the send → propose → **Apply** flow. The full-flow test needs the dev
+server started with `VITE_SUPABASE_FUNCTION_URL` set (any value — the test intercepts the request);
+otherwise it skips that case. Run with `npm run dev` in one terminal and `npx playwright test` in another.
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
