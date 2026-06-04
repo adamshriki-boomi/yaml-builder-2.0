@@ -62,13 +62,13 @@ export default function ChatComposer() {
       <ExRichInput
         type={RichInputType.BRAND}
         placeholder="Describe your connector or ask for a change…"
-        helpText="Enter to send · Shift+Enter for a new line"
         clearOnSend
         allowShiftEnter
         disabled={isStreaming}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onSend={(e: any) => submit(e.detail?.value ?? '')}
       />
+      <p className="chat-composer-hint">Enter to send · Shift+Enter for a new line</p>
     </div>
   );
 }

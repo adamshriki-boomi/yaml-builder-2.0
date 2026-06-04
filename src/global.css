@@ -863,6 +863,12 @@ ex-accordion + ex-accordion {
   justify-content: center;
 }
 
+.chat-composer-hint {
+  margin: 0;
+  font-size: var(--exo-font-size-x-micro);
+  color: var(--exo-color-font-secondary);
+}
+
 /* ExRichInput spans the full composer width. */
 .chat-composer ex-rich-input {
   --exo-component-rich-input-width: 100%;
