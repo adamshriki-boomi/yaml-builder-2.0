@@ -1,13 +1,10 @@
 import { useCallback, useRef } from 'react';
 import { useChatState, useChatDispatch } from './ChatContext';
 import { buildSystemPrompt } from './buildSystemPrompt';
+import { getStoredAccessCode, requestLock } from './accessGate';
 
 const FUNCTION_URL = import.meta.env.VITE_SUPABASE_FUNCTION_URL as string | undefined;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-
-// Where the (optional) chat access code is stored in the browser. Sent as the x-access-code
-// header; the proxy enforces it only when CHAT_ACCESS_CODE is configured server-side.
-export const ACCESS_CODE_STORAGE_KEY = 'yaml-builder-chat-access-code';
 
 // Pull the LAST ```yaml fenced block out of the assistant's reply — that's the proposed config.
 export function extractLastYamlBlock(text: string): string | null {
@@ -58,7 +55,7 @@ export function useChatStream() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-access-code': localStorage.getItem(ACCESS_CODE_STORAGE_KEY) ?? '',
+            'x-access-code': getStoredAccessCode(),
             ...(ANON_KEY ? { Authorization: `Bearer ${ANON_KEY}`, apikey: ANON_KEY } : {}),
           },
           body: JSON.stringify({
@@ -69,21 +66,9 @@ export function useChatStream() {
         });
 
         if (res.status === 401) {
-          // Access code missing/incorrect — drop the stored code and prompt for it.
-          try {
-            localStorage.removeItem(ACCESS_CODE_STORAGE_KEY);
-          } catch {
-            // ignore storage errors
-          }
-          dispatch({ type: 'SET_AUTH_REQUIRED', payload: true });
-          let msg = 'This assistant needs an access code. Enter it below to continue.';
-          try {
-            const err = await res.json();
-            if (err?.error) msg = err.error;
-          } catch {
-            // keep the default message
-          }
-          throw new Error(msg);
+          // Access code missing/incorrect — re-lock the app gate (this also clears the stored code).
+          requestLock();
+          throw new Error('Access code required or incorrect.');
         }
 
         if (!res.ok || !res.body) {

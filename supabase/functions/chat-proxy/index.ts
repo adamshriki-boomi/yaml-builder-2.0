@@ -61,11 +61,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const model = Deno.env.get("ANTHROPIC_MODEL") ?? "claude-opus-4-8";
   const maxTokens = Number(Deno.env.get("ANTHROPIC_MAX_TOKENS") ?? "8192");
 
-  let payload: { systemPrompt?: string; messages?: ChatRequestMessage[] };
+  let payload: { systemPrompt?: string; messages?: ChatRequestMessage[]; validate?: boolean };
   try {
     payload = await req.json();
   } catch {
     return jsonResponse({ error: "Request body must be valid JSON." }, 400);
+  }
+
+  // Lightweight access-code check used by the app's entry gate. The header check above already
+  // returned 401 if the code is wrong (or passes when no code is configured), so reaching here
+  // means the code is valid / not required. Return without calling Anthropic (no cost).
+  if (payload?.validate === true) {
+    return jsonResponse({ ok: true });
   }
 
   const { systemPrompt, messages } = payload;

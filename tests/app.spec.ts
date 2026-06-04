@@ -2,6 +2,14 @@ import { test, expect, Page } from '@playwright/test';
 
 const BASE = 'http://localhost:5173/yaml-builder-2.0/';
 
+// The app shows an access-code gate when the chat function reports a code is required. These UI
+// tests don't exercise the gate, so stub the function so the gate's validate check passes (200).
+test.beforeEach(async ({ page }) => {
+  await page.route('**/functions/v1/chat-proxy', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }),
+  );
+});
+
 // ExAccordionItem's label lives in shadow DOM, so Playwright's hasText filter
 // can't find a collapsed item by label. Find by label property, then click the
 // shadow-DOM header (the click handler is bound there, NOT to the host).

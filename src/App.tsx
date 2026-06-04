@@ -15,6 +15,7 @@ import YamlEditor from './components/Editor/YamlEditor';
 import TestPanel from './components/Test/TestPanel';
 import ChatPanel from './components/Chat/ChatPanel';
 import { ChatProvider } from './chat/ChatContext';
+import AccessGate from './components/AccessGate';
 
 const YAML_SIDE_PANEL_ID = 'yaml-side-panel';
 const SIDE_PANEL_MIN_WIDTH_PX = 240;
@@ -166,11 +167,13 @@ function AppContent() {
 
 function App() {
   return (
-    <ConnectorProvider>
-      <ChatProvider>
-        <AppContent />
-      </ChatProvider>
-    </ConnectorProvider>
+    <AccessGate>
+      <ConnectorProvider>
+        <ChatProvider>
+          <AppContent />
+        </ChatProvider>
+      </ConnectorProvider>
+    </AccessGate>
   );
 }
 

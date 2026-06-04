@@ -43,6 +43,15 @@ Chat UI → Supabase Edge Function (holds ANTHROPIC_API_KEY) → Anthropic Messa
 If the frontend env vars aren't set, the app loads normally and the chat shows a "not configured"
 notice instead of calling out.
 
+### Access gate
+
+Set a `CHAT_ACCESS_CODE` secret on the function (Supabase dashboard → Edge Functions → Secrets) to
+lock the whole app behind a code. On load the app asks the function (free `validate` check — no Claude
+call) whether a code is required; if so, it shows a full-screen prompt before anything else is usable.
+The code is validated server-side and remembered in the browser (`localStorage`). With no
+`CHAT_ACCESS_CODE` set, the app and chat are open. Note: a front-end gate on a public static site is a
+soft barrier — the real protection for your API spend is the server-side check in the function.
+
 ### Tests
 
 `tests/chat-agent.spec.ts` mocks the Edge Function with a canned stream and verifies the panel,

@@ -864,6 +864,50 @@ ex-accordion + ex-accordion {
 }
 
 /* ==============================
+   ACCESS GATE (app-entry lock overlay) — custom extension, see EXOSPHERE-CUSTOM.md
+   ============================== */
+
+.access-gate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--exo-spacing-large);
+  background: var(--exo-color-page);
+}
+
+.access-gate-card {
+  width: 100%;
+  max-width: 24rem;
+}
+
+.access-gate-title {
+  font-size: var(--exo-font-size-medium);
+  font-weight: 700;
+  margin: 0 0 var(--exo-spacing-small);
+}
+
+.access-gate-text {
+  font-size: var(--exo-font-size-small);
+  color: var(--exo-color-font-secondary);
+  margin: 0 0 var(--exo-spacing-small);
+}
+
+.access-gate-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--exo-spacing-small);
+}
+
+.access-gate-checking {
+  display: flex;
+  justify-content: center;
+  padding: var(--exo-spacing-large) 0;
+}
+
+/* ==============================
    DIALOG SHARED
    ============================== */
 
