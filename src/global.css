@@ -683,6 +683,12 @@ ex-accordion + ex-accordion {
   padding: var(--exo-spacing-2x-small) var(--exo-spacing-standard);
   border-bottom: 1px solid var(--exo-color-border-secondary);
   flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.chat-panel-header:hover {
+  background: var(--exo-color-background-secondary);
 }
 
 .chat-panel-header-left {
@@ -695,8 +701,11 @@ ex-accordion + ex-accordion {
 .chat-panel-title {
   font-size: var(--exo-font-size-x-small);
   font-weight: 600;
-  cursor: pointer;
-  user-select: none;
+}
+
+.chat-panel-actions {
+  display: flex;
+  align-items: center;
 }
 
 .chat-panel-body {
@@ -811,8 +820,10 @@ ex-accordion + ex-accordion {
 }
 
 .chat-proposal-preview {
-  max-height: 16rem;
+  height: 16rem;
+  min-height: 6rem;
   overflow: auto;
+  resize: vertical; /* native drag-to-grow handle so users can enlarge the YAML preview */
 }
 
 .chat-proposal-preview .cm-editor {
@@ -847,14 +858,15 @@ ex-accordion + ex-accordion {
   gap: var(--exo-spacing-2x-small);
 }
 
-.chat-composer-row {
+.chat-composer-status {
   display: flex;
-  align-items: flex-end;
-  gap: var(--exo-spacing-x-small);
+  justify-content: center;
 }
 
-.chat-composer-input {
-  flex: 1;
+/* ExRichInput spans the full composer width. */
+.chat-composer ex-rich-input {
+  --exo-component-rich-input-width: 100%;
+  width: 100%;
 }
 
 .chat-gate-text {

@@ -45,7 +45,7 @@ test.describe('AI Chat Agent', () => {
   test('chat panel renders at the bottom of the form column', async ({ page }) => {
     await expect(page.locator('.chat-panel-host')).toBeVisible();
     await expect(page.locator('.chat-panel-title')).toContainText('AI Assistant');
-    await expect(page.locator('.chat-composer ex-textarea')).toBeVisible();
+    await expect(page.locator('.chat-composer ex-rich-input')).toBeVisible();
   });
 
   test('quick-start chips show on an empty conversation', async ({ page }) => {
@@ -70,10 +70,10 @@ test.describe('AI Chat Agent', () => {
   });
 
   test('send a message → proposed YAML appears → Apply updates the editor', async ({ page }) => {
-    // Type a request and send it.
-    await page.locator('.chat-composer-input').click();
+    // Type a request into the ExRichInput and send with Enter (its built-in send trigger).
+    await page.locator('.chat-composer ex-rich-input .js-editable').click();
     await page.keyboard.type('Create a basic REST connector with bearer auth');
-    await page.locator('.chat-composer-row ex-icon-button').first().click();
+    await page.keyboard.press('Enter');
     await page.waitForTimeout(800);
 
     // If the dev server wasn't started with VITE_SUPABASE_FUNCTION_URL, the app never calls the

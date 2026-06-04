@@ -5,13 +5,19 @@
  * is horizontal-only. See EXOSPHERE-CUSTOM.md.
  * ────────────────────────────────────────────────────────────
  */
-import { useRef, useState } from 'react';
+import { useRef, useState, type KeyboardEvent } from 'react';
 import {
-  ExIconButton,
-  ExTooltip,
-  IconButtonType,
-  IconButtonFlavor,
-  TooltipPosition,
+  ExIcon,
+  ExDropdown,
+  ExMenu,
+  ExMenuItem,
+  ExDialog,
+  ExButton,
+  IconSize,
+  MenuItemVariant,
+  DialogHeaderContent,
+  ButtonType,
+  ButtonFlavor,
 } from '@boomi/exosphere';
 import { useChatState, useChatDispatch } from '../../chat/ChatContext';
 import ChatConversation from './ChatConversation';
@@ -24,10 +30,18 @@ export default function ChatPanel() {
   const isDragging = useRef(false);
   const [panelHeight, setPanelHeight] = useState(() => Math.round(window.innerHeight * 0.34));
   const [collapsed, setCollapsed] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const { messages } = useChatState();
   const chatDispatch = useChatDispatch();
 
   const toggleCollapsed = () => setCollapsed((c) => !c);
+
+  const handleHeaderKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleCollapsed();
+    }
+  };
 
   // Drag the top edge upward to grow the panel. Mirrors App.tsx's handleBottomDragStart,
   // but the ceiling is computed against the parent form column so the form area stays usable.
@@ -57,6 +71,11 @@ export default function ChatPanel() {
     document.addEventListener('mouseup', onMouseUp);
   };
 
+  const handleDelete = () => {
+    chatDispatch({ type: 'CLEAR_CONVERSATION' });
+    setConfirmOpen(false);
+  };
+
   return (
     <div
       className={`chat-panel-host${collapsed ? ' chat-panel-host--collapsed' : ''}`}
@@ -68,38 +87,74 @@ export default function ChatPanel() {
           <div className="chat-panel-handle-bar" />
         </div>
       )}
-      <div className="chat-panel-header">
+
+      {/* The whole header toggles collapse (like an accordion). */}
+      <div
+        className="chat-panel-header"
+        role="button"
+        tabIndex={0}
+        aria-expanded={!collapsed}
+        onClick={toggleCollapsed}
+        onKeyDown={handleHeaderKeyDown}
+      >
         <div className="chat-panel-header-left">
-          <ExIconButton
-            type={IconButtonType.TERTIARY}
-            flavor={IconButtonFlavor.BASE}
-            icon={collapsed ? 'direction-caret-up' : 'direction-caret-down'}
-            label={collapsed ? 'Expand assistant' : 'Collapse assistant'}
-            onClick={toggleCollapsed}
-          />
-          <span className="chat-panel-title" onClick={toggleCollapsed}>
-            AI Assistant
-          </span>
+          <ExIcon icon={collapsed ? 'direction-caret-up' : 'direction-caret-down'} size={IconSize.XS} />
+          <span className="chat-panel-title">AI Assistant</span>
         </div>
-        {!collapsed && messages.length > 0 && (
-          <ExTooltip position={TooltipPosition.BOTTOM}>
-            <ExIconButton
-              slot="anchor"
-              type={IconButtonType.TERTIARY}
-              flavor={IconButtonFlavor.BASE}
-              icon="delete"
-              label="Clear conversation"
-              onClick={() => chatDispatch({ type: 'CLEAR_CONVERSATION' })}
-            />
-            Clear conversation
-          </ExTooltip>
+        {messages.length > 0 && (
+          <span
+            className="chat-panel-actions"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <ExDropdown
+              align="right"
+              type={ButtonType.TERTIARY}
+              flavor={ButtonFlavor.BASE}
+              icon="three-dots-vertical-outline"
+              label="Conversation options"
+              tooltipText="Conversation options"
+            >
+              <ExMenu>
+                <ExMenuItem
+                  variant={MenuItemVariant.RISKY}
+                  onItemSelect={() => setConfirmOpen(true)}
+                  onClick={() => setConfirmOpen(true)}
+                >
+                  Delete conversation
+                </ExMenuItem>
+              </ExMenu>
+            </ExDropdown>
+          </span>
         )}
       </div>
+
       {!collapsed && (
         <div className="chat-panel-body">
           <ChatConversation />
           <ChatComposer />
         </div>
+      )}
+
+      {confirmOpen && (
+        <ExDialog
+          open
+          dialogTitle="Delete conversation?"
+          headerContent={DialogHeaderContent.WARNING}
+          onCancel={() => setConfirmOpen(false)}
+        >
+          <p className="dialog-body-text">
+            This permanently clears the current conversation. This can’t be undone.
+          </p>
+          <div slot="footer" className="dialog-footer-actions">
+            <ExButton type={ButtonType.SECONDARY} flavor={ButtonFlavor.BASE} onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </ExButton>
+            <ExButton type={ButtonType.PRIMARY} flavor={ButtonFlavor.RISKY} onClick={handleDelete}>
+              Delete conversation
+            </ExButton>
+          </div>
+        </ExDialog>
       )}
     </div>
   );
