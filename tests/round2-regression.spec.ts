@@ -12,7 +12,7 @@
  */
 import { test, expect, Page } from '@playwright/test';
 
-const BASE = 'http://localhost:5173/yaml-builder/';
+const BASE = 'http://localhost:5173/yaml-builder-2.0/';
 
 async function expandAccordion(page: Page, labelPrefix: string) {
   await page.evaluate((prefix) => {

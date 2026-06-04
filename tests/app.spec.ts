@@ -1,6 +1,6 @@
 import { test, expect, Page } from '@playwright/test';
 
-const BASE = 'http://localhost:5173/yaml-builder/';
+const BASE = 'http://localhost:5173/yaml-builder-2.0/';
 
 // ExAccordionItem's label lives in shadow DOM, so Playwright's hasText filter
 // can't find a collapsed item by label. Find by label property, then click the

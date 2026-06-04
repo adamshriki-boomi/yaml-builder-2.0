@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('debug: inspect tab rendering', async ({ page }) => {
-  await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+  await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(2000);
 
   // Screenshot initial state
@@ -46,7 +46,7 @@ test('debug: inspect tab rendering', async ({ page }) => {
 });
 
 test('debug: try clicking tabs manually', async ({ page }) => {
-  await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+  await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(2000);
 
   // Try clicking the first tab item directly

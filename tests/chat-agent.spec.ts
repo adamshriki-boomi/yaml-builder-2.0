@@ -1,6 +1,6 @@
 import { test, expect, Page } from '@playwright/test';
 
-const BASE = 'http://localhost:5173/yaml-builder/';
+const BASE = 'http://localhost:5173/yaml-builder-2.0/';
 
 // A canned assistant reply: a short explanation plus one ```yaml block (the proposal).
 const PROPOSED_YAML = [

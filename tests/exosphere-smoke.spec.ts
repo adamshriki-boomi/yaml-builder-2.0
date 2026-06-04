@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE = 'http://localhost:5173/yaml-builder/';
+const BASE = 'http://localhost:5173/yaml-builder-2.0/';
 
 test.describe('Exosphere alignment — smoke', () => {
   test.beforeEach(async ({ page }) => {

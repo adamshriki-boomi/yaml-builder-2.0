@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('audit all icons - Connector Config tab', async ({ page }) => {
   await page.setViewportSize({ width: 1200, height: 800 });
-  await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+  await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(2000);
 
   // Add a header to show delete icon
@@ -32,7 +32,7 @@ test('audit all icons - Connector Config tab', async ({ page }) => {
 
 test('audit all icons - Steps tab with REST step', async ({ page }) => {
   await page.setViewportSize({ width: 1200, height: 800 });
-  await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+  await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(2000);
 
   await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
@@ -68,7 +68,7 @@ test('audit all icons - Steps tab with REST step', async ({ page }) => {
 
 test('audit all icons - Parameters tab', async ({ page }) => {
   await page.setViewportSize({ width: 1200, height: 800 });
-  await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+  await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(2000);
 
   await page.locator('ex-tab-item', { hasText: 'Interface Parameters' }).click();

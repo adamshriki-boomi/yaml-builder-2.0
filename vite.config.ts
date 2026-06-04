@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
 export default defineConfig({
-  base: '/yaml-builder/',
+  base: '/yaml-builder-2.0/',
   plugins: [react()],
   build: {
     rollupOptions: {

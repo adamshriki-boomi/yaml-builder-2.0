@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Left panel scroll - all tabs', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 700 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
   });
 

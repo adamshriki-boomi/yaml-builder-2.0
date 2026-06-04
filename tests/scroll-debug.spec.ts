@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('debug scroll: add 2 REST steps and measure heights', async ({ page }) => {
   await page.setViewportSize({ width: 1200, height: 700 });
-  await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+  await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(2000);
 
   await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();

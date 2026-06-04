@@ -38,7 +38,7 @@ async function clickConfirmInDialog(page: Page) {
 test.describe('Epic 1: Connector Configuration', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
   });
 
@@ -116,7 +116,7 @@ test.describe('Epic 1: Connector Configuration', () => {
 test.describe('Epic 2: Interface Parameters', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.locator('ex-tab-item', { hasText: 'Interface Parameters' }).click();
     await page.waitForTimeout(500);
@@ -172,7 +172,7 @@ test.describe('Epic 2: Interface Parameters', () => {
 test.describe('Epic 3: Variables & Storage', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
   });
 
@@ -204,7 +204,7 @@ test.describe('Epic 3: Variables & Storage', () => {
 test.describe('Epic 4: Workflow Steps (inside multi-reports)', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
     await page.waitForTimeout(500);
@@ -257,7 +257,7 @@ test.describe('Epic 4: Workflow Steps (inside multi-reports)', () => {
 test.describe('Epic 5: Pagination', () => {
   test('US-5.1-5.4: Can enable pagination with type and params inside a report step', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
     await page.waitForTimeout(500);
@@ -279,7 +279,7 @@ test.describe('Epic 5: Pagination', () => {
 test.describe('Epic 6: Retry & Error Handling', () => {
   test('US-6.1: Can enable retry with status codes, attempts, interval inside a report step', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
     await page.waitForTimeout(500);
@@ -299,7 +299,7 @@ test.describe('Epic 6: Retry & Error Handling', () => {
 
   test('US-6.2: Loop step has ignore errors toggle', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
     await page.waitForTimeout(500);
@@ -318,7 +318,7 @@ test.describe('Epic 6: Retry & Error Handling', () => {
 test.describe('Epic 7: Variable Outputs', () => {
   test('US-7.1-7.3: Can add variable output with name, location, format inside a report step', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
     await page.waitForTimeout(500);
@@ -340,7 +340,7 @@ test.describe('Epic 7: Variable Outputs', () => {
 test.describe('Epic 8: YAML Editor', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
   });
 
@@ -364,7 +364,7 @@ test.describe('Epic 8: YAML Editor', () => {
 test.describe('Epic 9: Templates', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
   });
 
@@ -399,7 +399,7 @@ test.describe('Epic 9: Templates', () => {
 test.describe('Epic 10: UX & Responsiveness', () => {
   test('US-10.1: Works in wide drawer (800px+) with split layout', async ({ page }) => {
     await page.setViewportSize({ width: 900, height: 700 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await expect(page.locator('.yaml-side-panel')).toBeVisible();
     await expect(page.locator('ex-resize-handle')).toBeVisible();
@@ -407,14 +407,14 @@ test.describe('Epic 10: UX & Responsiveness', () => {
 
   test('US-10.1: Responsive bottom panel below 900px', async ({ page }) => {
     await page.setViewportSize({ width: 600, height: 700 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await expect(page.locator('.yaml-bottom-panel')).toBeVisible();
   });
 
   test('Light mode only, no theme toggle', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
     // Theme toggle was removed; assert no .theme-toggle remains
     const themeToggleCount = await page.locator('.theme-toggle').count();
@@ -426,7 +426,7 @@ test.describe('Epic 10: UX & Responsiveness', () => {
 test.describe('Epic 11: Multi-Report Structure', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
     await page.waitForTimeout(500);
@@ -478,7 +478,7 @@ test.describe('Epic 11: Multi-Report Structure', () => {
 test.describe('Epic 12: Report Management', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
     await page.waitForTimeout(500);
@@ -538,7 +538,7 @@ test.describe('Epic 12: Report Management', () => {
 test.describe('Epic 13: Report Parameters', () => {
   test('US-13.1: Each report has a collapsible Report Parameters section', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
     await page.waitForTimeout(500);
@@ -555,7 +555,7 @@ test.describe('Epic 13: Report Parameters', () => {
 
   test('US-13.2: Can add and remove report parameters', async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
     await page.waitForTimeout(500);
@@ -595,7 +595,7 @@ test.describe('Epic 13: Report Parameters', () => {
 test.describe('Epic 14: Pre-Run and Post-Run Configuration Groups', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('http://localhost:5173/yaml-builder/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:5173/yaml-builder-2.0/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
     await page.locator('ex-tab-item', { hasText: 'Workflow Steps' }).click();
     await page.waitForTimeout(500);
