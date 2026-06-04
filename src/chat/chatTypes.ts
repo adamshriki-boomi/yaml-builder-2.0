@@ -20,6 +20,9 @@ export interface ChatState {
   streamStatus: StreamStatus;
   streamingMessageId: string | null;
   errorText: string | null;
+  // True when the proxy rejected the request for a missing/incorrect access code,
+  // so the composer should prompt for it.
+  authRequired: boolean;
 }
 
 export type ChatAction =
@@ -29,6 +32,7 @@ export type ChatAction =
   | { type: 'FINALIZE_ASSISTANT_MESSAGE'; payload: { id: string; proposedYaml: string | null } }
   | { type: 'SET_ERROR'; payload: string }
   | { type: 'CLEAR_ERROR' }
+  | { type: 'SET_AUTH_REQUIRED'; payload: boolean }
   | { type: 'CLEAR_PROPOSAL'; payload: { id: string } }
   | { type: 'CLEAR_CONVERSATION' }
   | { type: 'RESTORE'; payload: ChatMessage[] };

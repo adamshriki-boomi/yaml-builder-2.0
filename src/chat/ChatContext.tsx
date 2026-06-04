@@ -18,6 +18,7 @@ const initialState: ChatState = {
   streamStatus: 'idle',
   streamingMessageId: null,
   errorText: null,
+  authRequired: false,
 };
 
 function loadPersistedMessages(): ChatMessage[] {
@@ -92,6 +93,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         errorText: null,
         streamStatus: state.streamStatus === 'error' ? 'idle' : state.streamStatus,
       };
+    case 'SET_AUTH_REQUIRED':
+      return { ...state, authRequired: action.payload };
     case 'CLEAR_PROPOSAL':
       return {
         ...state,

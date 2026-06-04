@@ -1,6 +1,7 @@
 import { useState, type KeyboardEvent } from 'react';
 import {
   ExTextarea,
+  ExInput,
   ExIconButton,
   ExButton,
   IconButtonType,
@@ -8,8 +9,8 @@ import {
   ButtonType,
   ButtonFlavor,
 } from '@boomi/exosphere';
-import { useChatState } from '../../chat/ChatContext';
-import { useChatStream } from '../../chat/useChatStream';
+import { useChatState, useChatDispatch } from '../../chat/ChatContext';
+import { useChatStream, ACCESS_CODE_STORAGE_KEY } from '../../chat/useChatStream';
 import { useConnector } from '../../context/ConnectorContext';
 
 const QUICK_PROMPTS = [
@@ -20,10 +21,12 @@ const QUICK_PROMPTS = [
 ];
 
 export default function ChatComposer() {
-  const { messages, streamStatus } = useChatState();
+  const { messages, streamStatus, authRequired } = useChatState();
+  const chatDispatch = useChatDispatch();
   const { yamlText } = useConnector();
   const { sendMessage, cancelStream } = useChatStream();
   const [draft, setDraft] = useState('');
+  const [codeDraft, setCodeDraft] = useState('');
   const isStreaming = streamStatus === 'streaming';
 
   const submit = (text: string) => {
@@ -41,6 +44,53 @@ export default function ChatComposer() {
       submit(draft);
     }
   };
+
+  const unlock = () => {
+    const code = codeDraft.trim();
+    if (!code) return;
+    try {
+      localStorage.setItem(ACCESS_CODE_STORAGE_KEY, code);
+    } catch {
+      // ignore storage errors
+    }
+    setCodeDraft('');
+    chatDispatch({ type: 'SET_AUTH_REQUIRED', payload: false });
+    chatDispatch({ type: 'CLEAR_ERROR' });
+  };
+
+  const handleCodeKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      unlock();
+    }
+  };
+
+  // Access-code gate: shown only after the proxy rejected a request for a missing/incorrect code.
+  if (authRequired) {
+    return (
+      <div className="chat-composer">
+        <p className="chat-gate-text">Enter the access code to use the AI assistant.</p>
+        <div className="chat-composer-row" onKeyDown={handleCodeKeyDown}>
+          <ExInput
+            className="chat-composer-input"
+            type="password"
+            placeholder="Access code"
+            value={codeDraft}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onInput={(e: any) => setCodeDraft(e.target.value)}
+          />
+          <ExButton
+            type={ButtonType.PRIMARY}
+            flavor={ButtonFlavor.BRANDED}
+            disabled={!codeDraft.trim()}
+            onClick={unlock}
+          >
+            Unlock
+          </ExButton>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="chat-composer">

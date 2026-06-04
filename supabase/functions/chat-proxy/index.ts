@@ -22,7 +22,7 @@ const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*", // tighten to your GitHub Pages origin in production
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-access-code",
 };
 
 interface ChatRequestMessage {
@@ -50,6 +50,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (!apiKey) {
     return jsonResponse({ error: "Server is missing ANTHROPIC_API_KEY." }, 500);
   }
+
+  // Optional access gate: if CHAT_ACCESS_CODE is set, require a matching x-access-code header.
+  // If it's not set, the function stays open (no gate).
+  const accessCode = Deno.env.get("CHAT_ACCESS_CODE");
+  if (accessCode && req.headers.get("x-access-code") !== accessCode) {
+    return jsonResponse({ error: "Access code required or incorrect." }, 401);
+  }
+
   const model = Deno.env.get("ANTHROPIC_MODEL") ?? "claude-opus-4-8";
   const maxTokens = Number(Deno.env.get("ANTHROPIC_MAX_TOKENS") ?? "8192");
 

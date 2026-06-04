@@ -5,6 +5,10 @@ import { buildSystemPrompt } from './buildSystemPrompt';
 const FUNCTION_URL = import.meta.env.VITE_SUPABASE_FUNCTION_URL as string | undefined;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
+// Where the (optional) chat access code is stored in the browser. Sent as the x-access-code
+// header; the proxy enforces it only when CHAT_ACCESS_CODE is configured server-side.
+export const ACCESS_CODE_STORAGE_KEY = 'yaml-builder-chat-access-code';
+
 // Pull the LAST ```yaml fenced block out of the assistant's reply — that's the proposed config.
 export function extractLastYamlBlock(text: string): string | null {
   const matches = [...text.matchAll(/```ya?ml\s*\n([\s\S]*?)```/gi)];
@@ -54,6 +58,7 @@ export function useChatStream() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'x-access-code': localStorage.getItem(ACCESS_CODE_STORAGE_KEY) ?? '',
             ...(ANON_KEY ? { Authorization: `Bearer ${ANON_KEY}`, apikey: ANON_KEY } : {}),
           },
           body: JSON.stringify({
@@ -62,6 +67,24 @@ export function useChatStream() {
           }),
           signal: controller.signal,
         });
+
+        if (res.status === 401) {
+          // Access code missing/incorrect — drop the stored code and prompt for it.
+          try {
+            localStorage.removeItem(ACCESS_CODE_STORAGE_KEY);
+          } catch {
+            // ignore storage errors
+          }
+          dispatch({ type: 'SET_AUTH_REQUIRED', payload: true });
+          let msg = 'This assistant needs an access code. Enter it below to continue.';
+          try {
+            const err = await res.json();
+            if (err?.error) msg = err.error;
+          } catch {
+            // keep the default message
+          }
+          throw new Error(msg);
+        }
 
         if (!res.ok || !res.body) {
           let msg = `Request failed (HTTP ${res.status}).`;

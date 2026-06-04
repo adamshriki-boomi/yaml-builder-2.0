@@ -857,6 +857,12 @@ ex-accordion + ex-accordion {
   flex: 1;
 }
 
+.chat-gate-text {
+  font-size: var(--exo-font-size-x-small);
+  color: var(--exo-color-font-secondary);
+  margin: 0;
+}
+
 /* ==============================
    DIALOG SHARED
    ============================== */
