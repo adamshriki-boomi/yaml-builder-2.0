@@ -62,6 +62,7 @@ export default function ChatComposer() {
       <ExRichInput
         type={RichInputType.BRAND}
         placeholder="Describe your connector or ask for a change…"
+        helpText="Enter to send · Shift+Enter for a new line"
         clearOnSend
         allowShiftEnter
         disabled={isStreaming}
