@@ -19,43 +19,74 @@
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
-const corsHeaders: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*", // tighten to your GitHub Pages origin in production
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-access-code",
-};
+// CORS is locked to the deployed app's origin (plus localhost for dev). Since
+// Access-Control-Allow-Origin can only carry one value, we check the request's Origin against an
+// allowlist and reflect it back. Extra origins can be added via the ALLOWED_ORIGINS env
+// (comma-separated) without editing code.
+const DEFAULT_ALLOWED_ORIGIN = "https://adamshriki-boomi.github.io";
+const ALLOWED_ORIGINS = new Set<string>([
+  DEFAULT_ALLOWED_ORIGIN,
+  ...(Deno.env.get("ALLOWED_ORIGINS") ?? "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean),
+]);
+
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return false;
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+  try {
+    const { protocol, hostname } = new URL(origin);
+    // Allow local development on any port.
+    if (protocol === "http:" && (hostname === "localhost" || hostname === "127.0.0.1")) return true;
+  } catch {
+    // not a valid origin
+  }
+  return false;
+}
+
+function buildCors(req: Request): Record<string, string> {
+  const origin = req.headers.get("Origin");
+  return {
+    "Access-Control-Allow-Origin": isAllowedOrigin(origin) ? origin! : DEFAULT_ALLOWED_ORIGIN,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-access-code",
+    Vary: "Origin",
+  };
+}
 
 interface ChatRequestMessage {
   role: "user" | "assistant";
   content: string;
 }
 
-function jsonResponse(body: unknown, status = 200): Response {
+function jsonResponse(body: unknown, status: number, cors: Record<string, string>): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...cors, "Content-Type": "application/json" },
   });
 }
 
-// deno-lint-ignore no-explicit-any
 Deno.serve(async (req: Request): Promise<Response> => {
+  const cors = buildCors(req);
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: cors });
   }
   if (req.method !== "POST") {
-    return jsonResponse({ error: "Method not allowed" }, 405);
+    return jsonResponse({ error: "Method not allowed" }, 405, cors);
   }
 
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
   if (!apiKey) {
-    return jsonResponse({ error: "Server is missing ANTHROPIC_API_KEY." }, 500);
+    return jsonResponse({ error: "Server is missing ANTHROPIC_API_KEY." }, 500, cors);
   }
 
   // Optional access gate: if CHAT_ACCESS_CODE is set, require a matching x-access-code header.
   // If it's not set, the function stays open (no gate).
   const accessCode = Deno.env.get("CHAT_ACCESS_CODE");
   if (accessCode && req.headers.get("x-access-code") !== accessCode) {
-    return jsonResponse({ error: "Access code required or incorrect." }, 401);
+    return jsonResponse({ error: "Access code required or incorrect." }, 401, cors);
   }
 
   const model = Deno.env.get("ANTHROPIC_MODEL") ?? "claude-opus-4-8";
@@ -65,19 +96,19 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try {
     payload = await req.json();
   } catch {
-    return jsonResponse({ error: "Request body must be valid JSON." }, 400);
+    return jsonResponse({ error: "Request body must be valid JSON." }, 400, cors);
   }
 
   // Lightweight access-code check used by the app's entry gate. The header check above already
   // returned 401 if the code is wrong (or passes when no code is configured), so reaching here
   // means the code is valid / not required. Return without calling Anthropic (no cost).
   if (payload?.validate === true) {
-    return jsonResponse({ ok: true });
+    return jsonResponse({ ok: true }, 200, cors);
   }
 
   const { systemPrompt, messages } = payload;
   if (!Array.isArray(messages) || messages.length === 0) {
-    return jsonResponse({ error: "`messages` must be a non-empty array." }, 400);
+    return jsonResponse({ error: "`messages` must be a non-empty array." }, 400, cors);
   }
 
   let upstream: Response;
@@ -99,7 +130,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       signal: req.signal,
     });
   } catch (e) {
-    return jsonResponse({ error: `Failed to reach Anthropic API: ${String(e)}` }, 502);
+    return jsonResponse({ error: `Failed to reach Anthropic API: ${String(e)}` }, 502, cors);
   }
 
   if (!upstream.ok || !upstream.body) {
@@ -107,13 +138,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return jsonResponse(
       { error: `Anthropic API error ${upstream.status}: ${detail.slice(0, 500)}` },
       502,
+      cors,
     );
   }
 
   const stream = transformAnthropicStream(upstream.body);
   return new Response(stream, {
     headers: {
-      ...corsHeaders,
+      ...cors,
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
