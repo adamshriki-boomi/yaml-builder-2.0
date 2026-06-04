@@ -505,6 +505,13 @@ ex-accordion + ex-accordion {
   margin-bottom: var(--exo-spacing-small);
 }
 
+/* ExCard's shadow-DOM header slot ships with no padding (it's built for full-bleed
+   cover images). We use it as a title/action bar, so inset the slotted content to match
+   the card body. Bottom is 0 — the body slot's own top padding supplies the gap. */
+.app-list-card > [slot="header"] {
+  padding: var(--exo-spacing-standard) var(--exo-spacing-medium) 0;
+}
+
 /* Generic header-row layout used inside ExCard slot="header" or as inline groups */
 .card-row {
   display: flex;
