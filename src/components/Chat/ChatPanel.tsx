@@ -5,7 +5,7 @@
  * is horizontal-only. See EXOSPHERE-CUSTOM.md.
  * ────────────────────────────────────────────────────────────
  */
-import { useRef, useState, type KeyboardEvent } from 'react';
+import { useRef, useState, useEffect, type KeyboardEvent } from 'react';
 import {
   ExIcon,
   ExDropdown,
@@ -28,13 +28,50 @@ const MIN_HEIGHT_PX = 160;
 export default function ChatPanel() {
   const hostRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
-  const [panelHeight, setPanelHeight] = useState(() => Math.round(window.innerHeight * 0.34));
-  const [collapsed, setCollapsed] = useState(false);
+  // null until the drawer is first opened; first open computes 75% of the form column,
+  // after which the value is remembered (and updated by drag-resize).
+  const [panelHeight, setPanelHeight] = useState<number | null>(null);
+  const [collapsed, setCollapsed] = useState(true);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // Drives the title gradient-shimmer nudge (toggled in short bursts by the effect below).
+  const [shimmer, setShimmer] = useState(false);
   const { messages } = useChatState();
   const chatDispatch = useChatDispatch();
 
-  const toggleCollapsed = () => setCollapsed((c) => !c);
+  // Nudge: sweep an Exosphere-color gradient through the title to draw the eye. Plays on
+  // every load (no persistence) while the drawer is collapsed — 3 times, 3s each, 10s
+  // apart — then stops. Stops immediately if opened; respects reduced-motion.
+  useEffect(() => {
+    if (!collapsed) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const PULSE_MS = 6000;
+    const GAP_MS = 6000;
+    const START_DELAY = 600;
+    const cycle = PULSE_MS + GAP_MS;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    for (let i = 0; i < 3; i++) {
+      const start = START_DELAY + i * cycle;
+      timers.push(setTimeout(() => setShimmer(true), start));
+      timers.push(setTimeout(() => setShimmer(false), start + PULSE_MS));
+    }
+    return () => timers.forEach(clearTimeout);
+  }, [collapsed]);
+
+  // First open fills 75% of the parent form column; clamped to the same bounds as drag-resize.
+  const computeOpenHeight = () => {
+    const parentRect = hostRef.current?.parentElement?.getBoundingClientRect();
+    const parentHeight = parentRect ? parentRect.height : window.innerHeight;
+    const maxHeight = Math.floor(parentHeight * 0.85);
+    return Math.max(MIN_HEIGHT_PX, Math.min(Math.round(parentHeight * 0.75), maxHeight));
+  };
+
+  const open = () => {
+    setCollapsed(false);
+    setShimmer(false);
+    setPanelHeight((h) => (h === null ? computeOpenHeight() : h));
+  };
+
+  const toggleCollapsed = () => (collapsed ? open() : setCollapsed(true));
 
   const handleHeaderKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -80,7 +117,7 @@ export default function ChatPanel() {
     <div
       className={`chat-panel-host${collapsed ? ' chat-panel-host--collapsed' : ''}`}
       ref={hostRef}
-      style={collapsed ? undefined : { height: panelHeight }}
+      style={collapsed ? undefined : { height: panelHeight ?? undefined }}
     >
       {!collapsed && (
         <div className="chat-panel-handle" onMouseDown={handleDragStart}>
@@ -98,8 +135,10 @@ export default function ChatPanel() {
         onKeyDown={handleHeaderKeyDown}
       >
         <div className="chat-panel-header-left">
-          <ExIcon icon={collapsed ? 'direction-caret-up' : 'direction-caret-down'} size={IconSize.XS} />
-          <span className="chat-panel-title">AI Assistant</span>
+          <span className={`chat-panel-caret${shimmer ? ' chat-panel-caret--shimmer' : ''}`}>
+            <ExIcon icon={collapsed ? 'direction-caret-up' : 'direction-caret-down'} size={IconSize.XS} />
+          </span>
+          <span className={`chat-panel-title${shimmer ? ' chat-panel-title--shimmer' : ''}`}>AI Assistant</span>
         </div>
         {messages.length > 0 && (
           <span

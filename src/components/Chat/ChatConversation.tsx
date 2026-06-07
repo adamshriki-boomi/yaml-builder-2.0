@@ -9,6 +9,7 @@ import {
 } from '@boomi/exosphere';
 import { useChatState } from '../../chat/ChatContext';
 import ChatMessage from './ChatMessage';
+import ChatEmptyState from './ChatEmptyState';
 
 export default function ChatConversation() {
   const { messages, streamStatus, errorText } = useChatState();
@@ -20,8 +21,11 @@ export default function ChatConversation() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, streamStatus]);
 
+  const isEmpty = messages.length === 0 && streamStatus !== 'streaming' && !errorText;
+
   return (
-    <div className="chat-conversation" ref={scrollRef}>
+    <div className={`chat-conversation${isEmpty ? ' chat-conversation--empty' : ''}`} ref={scrollRef}>
+      {isEmpty && <ChatEmptyState />}
       {messages.map((m) => (
         <ChatMessage key={m.id} message={m} />
       ))}

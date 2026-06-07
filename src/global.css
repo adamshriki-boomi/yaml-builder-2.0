@@ -687,11 +687,12 @@ ex-accordion + ex-accordion {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--exo-spacing-2x-small) var(--exo-spacing-standard);
+  padding: var(--exo-spacing-small) var(--exo-spacing-standard);
   border-bottom: 1px solid var(--exo-color-border-secondary);
   flex-shrink: 0;
   cursor: pointer;
   user-select: none;
+  transition: background-color 150ms ease;
 }
 
 .chat-panel-header:hover {
@@ -708,6 +709,81 @@ ex-accordion + ex-accordion {
 .chat-panel-title {
   font-size: var(--exo-font-size-x-small);
   font-weight: 600;
+}
+
+/* First-run nudge: a quick Exosphere-color gradient sweeps through the title to draw the
+   eye. JS plays it 3× (1s each, 10s apart) then stops. Token-styled custom extension —
+   see EXOSPHERE-CUSTOM.md. */
+.chat-panel-title--shimmer {
+  /* Font-colour at both ends so the sweep eases out of, and back into, the original text
+     colour; the Exosphere hues only show as the band passes through the middle. */
+  background: linear-gradient(
+    90deg,
+    var(--exo-color-font) 0%,
+    var(--exo-color-font) 33%,
+    var(--exo-palette-periwinkle-60) 42%,
+    var(--exo-palette-blue-60) 50%,
+    var(--exo-palette-aqua-60) 58%,
+    var(--exo-color-font) 67%,
+    var(--exo-color-font) 100%
+  );
+  background-size: 300% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: chat-ai-text-shimmer 6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes chat-ai-text-shimmer {
+  from {
+    background-position: 0% center;
+  }
+  to {
+    background-position: 100% center;
+  }
+}
+
+/* The chevron animates in sync with the title (icons can't be gradient-clipped, so its
+   currentColor cycles through the same Exosphere hues and back to the original colour). */
+.chat-panel-caret {
+  display: flex;
+  align-items: center;
+}
+
+.chat-panel-caret--shimmer {
+  animation: chat-ai-icon-shimmer 6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes chat-ai-icon-shimmer {
+  0% {
+    color: var(--exo-color-font);
+  }
+  25% {
+    color: var(--exo-palette-periwinkle-60);
+  }
+  50% {
+    color: var(--exo-palette-blue-60);
+  }
+  75% {
+    color: var(--exo-palette-aqua-60);
+  }
+  100% {
+    color: var(--exo-color-font);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-panel-title--shimmer {
+    animation: none;
+    background: none;
+    color: var(--exo-color-font);
+    -webkit-text-fill-color: var(--exo-color-font);
+  }
+
+  .chat-panel-caret--shimmer {
+    animation: none;
+  }
 }
 
 .chat-panel-actions {
@@ -735,6 +811,20 @@ ex-accordion + ex-accordion {
 
 .chat-conversation--empty {
   justify-content: center;
+}
+
+/* First-use empty state: AI sparkle + intro + quick-start pills as the call to action. */
+.chat-empty-state {
+  display: flex;
+  justify-content: center;
+  padding: var(--exo-spacing-large) var(--exo-spacing-small);
+}
+
+.chat-empty-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--exo-spacing-2x-small);
 }
 
 .chat-message {
