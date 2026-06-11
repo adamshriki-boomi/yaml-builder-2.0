@@ -56,6 +56,12 @@ html, body, #root {
   gap: var(--exo-spacing-3x-small);
 }
 
+/* Pushes the AI-Assistant layout switch + open button to the far right of the toolbar. */
+.editor-toolbar-group--end {
+  margin-left: auto;
+  gap: var(--exo-spacing-2x-small);
+}
+
 .editor-toolbar-divider {
   width: 1px;
   height: var(--exo-spacing-large);
@@ -133,9 +139,31 @@ html, body, #root {
 }
 
 .app-form-column + ex-resize-handle,
-ex-resize-handle + .yaml-side-panel {
+ex-resize-handle + .yaml-side-panel,
+ex-resize-handle + .ai-side-panel {
   /* Make the ExResizeHandle area itself visible by giving it a flanking line */
   border-left-color: var(--exo-color-border);
+}
+
+/* ==============================
+   SIDE VARIANT (3-column wide mode): editor is the flexible middle column,
+   the AI Assistant is a fixed-width resizable third column on the right.
+   ============================== */
+
+/* Editor as the flexible middle column — yields space first so the fixed form/AI
+   columns never collapse. Overrides .yaml-side-panel's min-width. */
+.yaml-side-panel--flex {
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-side-panel {
+  min-width: 18.75rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid var(--exo-color-border);
+  background: var(--exo-color-background);
 }
 
 /* ==============================
@@ -797,6 +825,41 @@ ex-accordion + ex-accordion {
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+}
+
+/* ==============================
+   CHAT SIDE PANEL (AI assistant — right-side third column, "Side" variant).
+   Mirrors .chat-panel-* but the header is static (open/closed is driven by the toolbar
+   toggle + close button, so no accordion cursor/hover). Horizontal resize uses stock
+   ExResizeHandle — no custom vertical handle. See EXOSPHERE-CUSTOM.md.
+   ============================== */
+
+.chat-side-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.chat-side-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--exo-spacing-small) var(--exo-spacing-standard);
+  border-bottom: 1px solid var(--exo-color-border-secondary);
+  flex-shrink: 0;
+}
+
+.chat-side-title {
+  font-size: var(--exo-font-size-x-small);
+  font-weight: 600;
+}
+
+.chat-side-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--exo-spacing-3x-small);
 }
 
 .chat-conversation {

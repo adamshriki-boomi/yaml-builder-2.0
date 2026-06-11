@@ -20,8 +20,7 @@ import {
   ButtonFlavor,
 } from '@boomi/exosphere';
 import { useChatState, useChatDispatch } from '../../chat/ChatContext';
-import ChatConversation from './ChatConversation';
-import ChatComposer from './ChatComposer';
+import ChatBody from './ChatBody';
 
 const MIN_HEIGHT_PX = 160;
 
@@ -168,12 +167,7 @@ export default function ChatPanel() {
         )}
       </div>
 
-      {!collapsed && (
-        <div className="chat-panel-body">
-          <ChatConversation />
-          <ChatComposer />
-        </div>
-      )}
+      {!collapsed && <ChatBody />}
 
       {confirmOpen && (
         <ExDialog

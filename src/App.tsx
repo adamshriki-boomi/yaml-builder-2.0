@@ -14,12 +14,28 @@ import StepList from './components/Steps/StepList';
 import YamlEditor from './components/Editor/YamlEditor';
 import TestPanel from './components/Test/TestPanel';
 import ChatPanel from './components/Chat/ChatPanel';
+import ChatSidePanel from './components/Chat/ChatSidePanel';
 import { ChatProvider } from './chat/ChatContext';
+import { LayoutProvider, useLayout } from './layout/LayoutContext';
 import AccessGate from './components/AccessGate';
 
 const YAML_SIDE_PANEL_ID = 'yaml-side-panel';
 const SIDE_PANEL_MIN_WIDTH_PX = 240;
 const SIDE_PANEL_MAX_WIDTH_PX = 1200;
+
+// Side variant (3-column) ids + resize bounds. The editor is the flexible middle column;
+// the form and AI columns are fixed-width and resized via ExResizeHandle (which writes px
+// onto the target element — so each target must be flex:none).
+const FORM_COLUMN_ID = 'app-form-column';
+const AI_SIDE_PANEL_ID = 'ai-side-panel';
+const FORM_MIN_WIDTH_PX = 320;
+const FORM_MAX_WIDTH_PX = 720;
+const AI_MIN_WIDTH_PX = 300;
+const AI_MAX_WIDTH_PX = 640;
+// Even-split defaults (used until a column is dragged): form is 50% when the AI panel is
+// closed (editor takes the other 50%); when open, form + AI are ~1/3 each and the flexible
+// editor fills the remaining ~1/3.
+const EVEN_THIRD = '33.333%';
 
 const TABS = ['Connector Configuration', 'Interface Parameters', 'Workflow Steps'];
 
@@ -53,7 +69,16 @@ function TabContent({ activeTab }: { activeTab: number }) {
 function AppContent() {
   const [activeTab, setActiveTab] = useState(0);
   const [isTestMode, setIsTestMode] = useState(false);
-  const [isWide, setIsWide] = useState(true);
+  const {
+    placement,
+    sideOpen,
+    isWide,
+    formWidth,
+    aiWidth,
+    setIsWide,
+    setFormWidth,
+    setAiWidth,
+  } = useLayout();
   const [bottomPanelHeight, setBottomPanelHeight] = useState(() =>
     Math.round(window.innerHeight * 0.5),
   );
@@ -108,30 +133,80 @@ function AppContent() {
     ? <TestPanel onBackToEditor={() => setIsTestMode(false)} />
     : <YamlEditor onTestToggle={() => setIsTestMode(!isTestMode)} isTestMode={isTestMode} />;
 
+  // ExResizeHandle writes the new width directly onto the DOM node; persist it so it survives
+  // re-renders (e.g. toggling Test mode re-applies the inline default) and page reloads.
+  const persistWidthFrom = (id: string, set: (w: number) => void) => {
+    const el = document.getElementById(id);
+    if (el) set(Math.round(el.getBoundingClientRect().width));
+  };
+
   if (isWide) {
+    const isSide = placement === 'side';
     return (
       <div className="app-shell" ref={containerRef}>
         <div className="app-body app-body--row">
-          <div className="app-form-column">
+          <div
+            id={isSide ? FORM_COLUMN_ID : undefined}
+            className="app-form-column"
+            style={isSide ? { width: formWidth ?? (sideOpen ? EVEN_THIRD : '50%'), flex: 'none' } : undefined}
+          >
             <TabBar activeTab={activeTab} onSelect={setActiveTab} />
             <div className="tab-content">
               <TabContent activeTab={activeTab} />
             </div>
-            <ChatPanel />
+            {/* Bottom variant: the AI Assistant lives here. In the Side variant it is the
+                third column instead (the two are mutually exclusive — never both mounted). */}
+            {!isSide && <ChatPanel />}
           </div>
-          <ExResizeHandle
-            targetId={YAML_SIDE_PANEL_ID}
-            position={ResizerPosition.LEFT}
-            minWidth={SIDE_PANEL_MIN_WIDTH_PX}
-            maxWidth={SIDE_PANEL_MAX_WIDTH_PX}
-          />
-          <div
-            id={YAML_SIDE_PANEL_ID}
-            className="yaml-side-panel"
-            style={{ width: '50%', flex: 'none' }}
-          >
-            {rightPanel}
-          </div>
+
+          {isSide ? (
+            <>
+              <ExResizeHandle
+                targetId={FORM_COLUMN_ID}
+                position={ResizerPosition.RIGHT}
+                minWidth={FORM_MIN_WIDTH_PX}
+                maxWidth={FORM_MAX_WIDTH_PX}
+                onResizeComplete={() => persistWidthFrom(FORM_COLUMN_ID, setFormWidth)}
+              />
+              <div className="yaml-side-panel yaml-side-panel--flex">
+                {rightPanel}
+              </div>
+              {sideOpen && (
+                <>
+                  <ExResizeHandle
+                    targetId={AI_SIDE_PANEL_ID}
+                    position={ResizerPosition.LEFT}
+                    minWidth={AI_MIN_WIDTH_PX}
+                    maxWidth={AI_MAX_WIDTH_PX}
+                    onResizeComplete={() => persistWidthFrom(AI_SIDE_PANEL_ID, setAiWidth)}
+                  />
+                  <div
+                    id={AI_SIDE_PANEL_ID}
+                    className="ai-side-panel"
+                    style={{ width: aiWidth ?? EVEN_THIRD, flex: 'none' }}
+                  >
+                    <ChatSidePanel />
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <ExResizeHandle
+                targetId={YAML_SIDE_PANEL_ID}
+                position={ResizerPosition.LEFT}
+                minWidth={SIDE_PANEL_MIN_WIDTH_PX}
+                maxWidth={SIDE_PANEL_MAX_WIDTH_PX}
+              />
+              <div
+                id={YAML_SIDE_PANEL_ID}
+                className="yaml-side-panel"
+                style={{ width: '50%', flex: 'none' }}
+              >
+                {rightPanel}
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -170,7 +245,9 @@ function App() {
     <AccessGate>
       <ConnectorProvider>
         <ChatProvider>
-          <AppContent />
+          <LayoutProvider>
+            <AppContent />
+          </LayoutProvider>
         </ChatProvider>
       </ConnectorProvider>
     </AccessGate>

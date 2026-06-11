@@ -8,6 +8,7 @@ import { ExAlertBanner, ExIconButton, ExTooltip, AlertBannerType, AlertBannerVar
 import { useConnector, useConnectorDispatch } from '../../context/ConnectorContext';
 import { useYamlSync } from '../../hooks/useYamlSync';
 import { stringify, parse } from 'yaml';
+import AssistantToolbarControls from './AssistantToolbarControls';
 
 interface YamlEditorProps {
   onTestToggle?: () => void;
@@ -182,6 +183,7 @@ export default function YamlEditor({ onTestToggle, isTestMode }: YamlEditorProps
             </ExTooltip>
           )}
         </div>
+        <AssistantToolbarControls />
       </div>
 
       {copyFeedback && (

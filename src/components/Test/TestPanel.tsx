@@ -13,6 +13,7 @@ import {
 import InterfaceParametersForm from './InterfaceParametersForm';
 import TestRunningState from './TestRunningState';
 import TestResults from './TestResults';
+import AssistantToolbarControls from '../Editor/AssistantToolbarControls';
 import { useConnector } from '../../context/ConnectorContext';
 import { generateDemoResults } from '../../data/demoTestResults';
 import type { TestRunResult } from '../../types/connector';
@@ -65,6 +66,7 @@ export default function TestPanel({ onBackToEditor }: Props) {
           Back to YAML Editor
         </ExTooltip>
         <span className="test-panel-title">Test Blueprint</span>
+        <AssistantToolbarControls />
       </div>
       <div className={isContentPhase ? 'test-panel-body test-panel-body--content' : 'test-panel-body'}>
         {phase === 'empty' && (
