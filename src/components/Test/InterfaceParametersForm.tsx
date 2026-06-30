@@ -99,7 +99,7 @@ function renderField(
   if (param.type === 'authentication') {
     return (
       <ExSelect
-        label="Connection"
+        label={param.label || 'Connection'}
         helpText="Select a Connection from an existing list or create a new one."
         selected={value}
         valueBasedSelection
