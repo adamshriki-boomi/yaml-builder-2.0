@@ -64,6 +64,16 @@ interface LayoutContextValue extends PersistedPrefs {
   toggleSideOpen: () => void;
   setFormWidth: (w: number) => void;
   setAiWidth: (w: number) => void;
+  // Imperatively bring the AI Assistant into view from anywhere (e.g. the "Fix with AI" button).
+  // In wide layouts it opens the side column; the bumping nonce lets the bottom/narrow ChatPanel
+  // (which owns its own collapsed state) expand in response.
+  revealNonce: number;
+  revealAssistant: () => void;
+  // Imperatively return the middle panel to the YAML editor (exit Test mode). Used after the AI's
+  // "Apply to editor" so the now-stale test results give way to the freshly-updated YAML. The
+  // nonce lets AppContent (which owns isTestMode) react without prop-drilling.
+  showEditorNonce: number;
+  showEditor: () => void;
 }
 
 const LayoutContext = createContext<LayoutContextValue | null>(null);
@@ -71,6 +81,8 @@ const LayoutContext = createContext<LayoutContextValue | null>(null);
 export function LayoutProvider({ children }: { children: ReactNode }) {
   const [prefs, setPrefs] = useState<PersistedPrefs>(loadPrefs);
   const [isWide, setIsWide] = useState(true);
+  const [revealNonce, setRevealNonce] = useState(0);
+  const [showEditorNonce, setShowEditorNonce] = useState(0);
 
   useEffect(() => {
     try {
@@ -86,6 +98,13 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
   const setFormWidth = useCallback((formWidth: number) => setPrefs((p) => ({ ...p, formWidth })), []);
   const setAiWidth = useCallback((aiWidth: number) => setPrefs((p) => ({ ...p, aiWidth })), []);
 
+  const revealAssistant = useCallback(() => {
+    if (isWide) setPrefs((p) => ({ ...p, placement: 'side', sideOpen: true }));
+    setRevealNonce((n) => n + 1);
+  }, [isWide]);
+
+  const showEditor = useCallback(() => setShowEditorNonce((n) => n + 1), []);
+
   const value = useMemo<LayoutContextValue>(
     () => ({
       ...prefs,
@@ -96,8 +115,12 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
       toggleSideOpen,
       setFormWidth,
       setAiWidth,
+      revealNonce,
+      revealAssistant,
+      showEditorNonce,
+      showEditor,
     }),
-    [prefs, isWide, setPlacement, setSideOpen, toggleSideOpen, setFormWidth, setAiWidth],
+    [prefs, isWide, setPlacement, setSideOpen, toggleSideOpen, setFormWidth, setAiWidth, revealNonce, revealAssistant, showEditorNonce, showEditor],
   );
 
   return <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>;

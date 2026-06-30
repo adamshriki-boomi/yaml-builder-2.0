@@ -1,4 +1,17 @@
-import type { MultiReport, ReportTestResult, StepResult, TestRunResult } from '../types/connector';
+import type {
+  ConnectorConfig,
+  MultiReport,
+  ReportTestResult,
+  RestStep,
+  StepResult,
+  TestRunResult,
+  WorkflowStep,
+} from '../types/connector';
+
+// The one parameter the reactive demo judge keys on. A report that references {{account_id}} but
+// has no matching interface/report parameter fails; declaring it (the AI fix) turns the report green.
+// Kept deliberately narrow so the judge never false-fails the user's own pre-existing configs.
+export const SENTINEL_PARAM = 'account_id';
 
 interface BakedReport {
   status: 'passed' | 'failed';
@@ -107,23 +120,31 @@ const baked: Record<string, BakedReport> = {
       meta: { total: 8 },
     }, null, 2),
   },
+  // Passing baseline for the conversion report. It only fails when the reactive judge detects the
+  // planted missing-parameter fault (see generateDemoResults); once the AI fix declares account_id,
+  // it falls through to this passing result.
   conversion_events: {
-    status: 'failed',
-    recordsReturned: 0,
-    durationMs: 1842,
+    status: 'passed',
+    recordsReturned: 31,
+    durationMs: 1180,
     steps: [
-      { method: 'GET', url: '/reports/conversions', statusCode: 404, durationMs: 612 },
-      { method: 'GET', url: '/reports/conversions', statusCode: 404, durationMs: 614 },
-      { method: 'GET', url: '/reports/conversions', statusCode: 404, durationMs: 616 },
+      { method: 'GET', url: '/reports/conversions?account_id=acct_4821&offset=0&limit=200', statusCode: 200, durationMs: 598 },
+      { method: 'GET', url: '/reports/conversions?account_id=acct_4821&offset=200&limit=200', statusCode: 200, durationMs: 582 },
     ],
-    errorCode: 'RVR-ERR-001',
-    errorMessage:
-      'Max attempts reached for status code 404. The endpoint /reports/conversions returned "Not Found" — the report may not exist for this account, or pagination ran past the available data.',
+    sampleColumns: ['conversion_id', 'event_name', 'conversions', 'value', 'occurred_at'],
+    sampleData: [
+      { conversion_id: 'cv_3301', event_name: 'purchase', conversions: 184, value: '$12,480.00', occurred_at: '2026-06-21' },
+      { conversion_id: 'cv_3302', event_name: 'signup', conversions: 412, value: '$0.00', occurred_at: '2026-06-21' },
+      { conversion_id: 'cv_3303', event_name: 'add_to_cart', conversions: 1_027, value: '$0.00', occurred_at: '2026-06-22' },
+    ],
     rawResponse: JSON.stringify({
-      status: 400,
-      message:
-        'Action Failed. reason: [RVR-ERR-001]: Connector errors: An error occurred during pagination: Max attempts for status code: 404 reached with: "{\\n \\"message\\": \\"Not Found\\",\\n \\"documentation_url\\": \\"https://docs.example.com/rest/reports/conversions#list\\",\\n \\"status\\": \\"404\\"\\n}"',
-      data: [],
+      status: 200,
+      data: [
+        { conversion_id: 'cv_3301', event_name: 'purchase', conversions: 184, value: 12480.0, occurred_at: '2026-06-21' },
+        { conversion_id: 'cv_3302', event_name: 'signup', conversions: 412, value: 0, occurred_at: '2026-06-21' },
+        { conversion_id: 'cv_3303', event_name: 'add_to_cart', conversions: 1027, value: 0, occurred_at: '2026-06-22' },
+      ],
+      meta: { total: 31, account_id: 'acct_4821', page: 1, page_size: 200 },
     }, null, 2),
   },
 };
@@ -160,25 +181,78 @@ function genericPassing(reportName: string, index: number): BakedReport {
   };
 }
 
-function genericFailing(reportName: string): BakedReport {
-  const key = toKey(reportName);
+// The reactive failure: a report references {{account_id}} but the blueprint declares no such
+// required parameter, so the request can't be built. Naming the missing parameter in the error is
+// realistic (real APIs do this) and gives the assistant a clear lead to diagnose and fix.
+function missingParamFailure(reportName: string, paramName: string): BakedReport {
   return {
     status: 'failed',
     recordsReturned: 0,
-    durationMs: 1500,
+    durationMs: 740,
     steps: [
-      { method: 'GET', url: `/api/${key}`, statusCode: 404, durationMs: 500 },
-      { method: 'GET', url: `/api/${key}`, statusCode: 404, durationMs: 500 },
-      { method: 'GET', url: `/api/${key}`, statusCode: 404, durationMs: 500 },
+      { method: 'GET', url: `/reports/conversions?${paramName}=`, statusCode: 400, durationMs: 740 },
     ],
-    errorCode: 'RVR-ERR-001',
-    errorMessage: `Endpoint /api/${key} returned 404 Not Found. The resource may not exist for this account.`,
+    errorCode: 'RVR-ERR-014',
+    errorMessage:
+      `Report "${reportName}" failed: required parameter "${paramName}" is missing. The request to ` +
+      `GET /reports/conversions could not be built because the blueprint has no interface parameter ` +
+      `named "${paramName}" to supply it.`,
     rawResponse: JSON.stringify({
       status: 400,
-      message: `Action Failed. reason: [RVR-ERR-001]: Connector errors: 404 reached for /api/${key}`,
+      report: reportName,
+      message:
+        `Action Failed. reason: [RVR-ERR-014]: Connector errors: Missing required parameter "${paramName}". ` +
+        `The request template references {{${paramName}}} but no value was provided.`,
       data: [],
     }, null, 2),
   };
+}
+
+// Collect the rest steps of a report, flattening one level of loop nesting.
+function restStepsOf(report: MultiReport): RestStep[] {
+  const out: RestStep[] = [];
+  const visit = (steps: WorkflowStep[]) => {
+    for (const step of steps) {
+      if (step.type === 'rest') out.push(step);
+      else if (step.type === 'loop') out.push(...step.nested_steps);
+    }
+  };
+  visit(report.steps);
+  return out;
+}
+
+// Pull {{token}} references out of one rest step's text fields. The [^%] first-char guard skips
+// loop item refs like {{%current_item%}}; \s* tolerates spacing like {{ account_id }}.
+function tokenRefsOf(step: RestStep): string[] {
+  const haystack = [
+    step.endpoint,
+    step.body,
+    ...step.query_params.map((q) => q.value),
+    ...step.headers.map((h) => h.value),
+  ].join('\n');
+  const tokens: string[] = [];
+  for (const m of haystack.matchAll(/\{\{\s*([^%}][^}]*?)\s*\}\}/g)) {
+    tokens.push(toKey(m[1]));
+  }
+  return tokens;
+}
+
+// True if any rest step in the report references the sentinel parameter.
+function referencesSentinel(report: MultiReport): boolean {
+  const sentinelKey = toKey(SENTINEL_PARAM);
+  return restStepsOf(report).some((step) => tokenRefsOf(step).includes(sentinelKey));
+}
+
+// True if the sentinel is declared anywhere the request could draw it from — an interface
+// parameter OR this report's own report_parameters. Lenient by design so any reasonable AI fix
+// (interface param, report param, different casing/label) reliably flips the report green.
+function sentinelDeclared(report: MultiReport, config: ConnectorConfig): boolean {
+  const sentinelKey = toKey(SENTINEL_PARAM);
+  const declared = [
+    ...config.interface_parameters.map((p) => p.name),
+    ...report.report_parameters.map((p) => p.name),
+  ].map(toKey);
+  return declared.includes(sentinelKey);
 }
 
 function toTestResult(reportName: string, baked: BakedReport): ReportTestResult {
@@ -196,21 +270,26 @@ function toTestResult(reportName: string, baked: BakedReport): ReportTestResult 
   };
 }
 
-export function generateDemoResults(reports: MultiReport[]): TestRunResult {
+export function generateDemoResults(config: ConnectorConfig): TestRunResult {
   const startedAt = new Date().toISOString();
 
-  const list = reports.length > 0
-    ? reports
+  const list = config.multi_reports.length > 0
+    ? config.multi_reports
     : [{ id: 'demo', name: 'Sample Report', report_parameters: [], steps: [] } as MultiReport];
 
   const results: ReportTestResult[] = list.map((report, index) => {
-    const key = toKey(report.name);
-    const matched = baked[key];
+    // (a) Reactive fault — highest priority: a report that needs the sentinel parameter but doesn't
+    // declare it fails. This is the only source of failure now; everything else passes.
+    if (referencesSentinel(report) && !sentinelDeclared(report, config)) {
+      return toTestResult(report.name, missingParamFailure(report.name, SENTINEL_PARAM));
+    }
+
+    // (b) Curated showcase reports keyed by name.
+    const matched = baked[toKey(report.name)];
     if (matched) return toTestResult(report.name, matched);
 
-    const isLast = index === list.length - 1;
-    const fallback = isLast ? genericFailing(report.name) : genericPassing(report.name, index);
-    return toTestResult(report.name, fallback);
+    // (c) Anything else passes with generic synthesized data.
+    return toTestResult(report.name, genericPassing(report.name, index));
   });
 
   const durationMs = results.reduce((sum, r) => sum + r.durationMs, 0);

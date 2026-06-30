@@ -2,6 +2,7 @@ import {
   ExAccordion,
   ExAccordionItem,
   ExBadge,
+  ExButton,
   ExIcon,
   ExPill,
   ExAlertBanner,
@@ -11,6 +12,8 @@ import {
   ExStructuredListCol,
   AccordionVariant,
   BadgeColor,
+  ButtonType,
+  ButtonFlavor,
   IconVariant,
   IconSize,
   PillColor,
@@ -22,6 +25,8 @@ import type { ReportTestResult } from '../../types/connector';
 
 interface Props {
   result: ReportTestResult;
+  onFixWithAI?: (report: ReportTestResult) => void;
+  fixDisabled?: boolean;
 }
 
 function formatDuration(ms: number): string {
@@ -41,7 +46,7 @@ function statusCodeColor(statusCode: number): BadgeColor {
   return BadgeColor.GRAY;
 }
 
-export default function ReportResultRow({ result }: Props) {
+export default function ReportResultRow({ result, onFixWithAI, fixDisabled }: Props) {
   const passed = result.status === 'passed';
   const statusClass = passed ? 'report-row--passed' : 'report-row--failed';
   const headerSummary = passed
@@ -124,11 +129,28 @@ export default function ReportResultRow({ result }: Props) {
           </>
         )}
 
-        {!passed && result.errorCode && (
+        {!passed && (
           <div className="report-error">
-            <ExAlertBanner type={AlertBannerType.ERROR} variant={AlertBannerVariant.INLINE}>
-              <strong>{result.errorCode}</strong> — {result.errorMessage ?? 'See raw response for details.'}
-            </ExAlertBanner>
+            {result.errorCode && (
+              <ExAlertBanner type={AlertBannerType.ERROR} variant={AlertBannerVariant.INLINE}>
+                <strong>{result.errorCode}</strong> — {result.errorMessage ?? 'See raw response for details.'}
+              </ExAlertBanner>
+            )}
+            {onFixWithAI && (
+              <div className="report-error-actions">
+                <ExButton
+                  type={ButtonType.PRIMARY}
+                  flavor={ButtonFlavor.BRANDED}
+                  disabled={fixDisabled}
+                  onClick={() => onFixWithAI(result)}
+                >
+                  Fix with AI
+                </ExButton>
+                <span className="report-error-hint">
+                  Sends this error and your current YAML to the AI Assistant.
+                </span>
+              </div>
+            )}
           </div>
         )}
 

@@ -160,8 +160,19 @@ const OUTPUT_CONTRACT = `# How to respond
 - If the user only asks a QUESTION (explanation, validation, advice) and wants no change: answer in
   plain text with NO yaml code block.
 - Preserve the user's existing configuration where they didn't ask for changes — start from the
-  "current configuration" below and modify it, rather than discarding it.
-- Keep names, endpoints, and values realistic and consistent with the user's stated API.`;
+  "current configuration" below and modify it, rather than discarding it. Do NOT rename, change the
+  \`type\` of, reorder, or remove any existing parameters, steps, or reports unless the fix strictly
+  requires it. Make the SMALLEST change that resolves the problem.
+- Keep names, endpoints, and values realistic and consistent with the user's stated API.
+- If the user reports a FAILED test or connection error, diagnose the root cause and return the
+  COMPLETE corrected YAML. When the error is a missing required parameter — i.e. a request references
+  a \`{{placeholder}}\` token that has no matching parameter — the fix is to ADD a NEW interface
+  parameter, NOT to alter existing ones:
+  • Its \`name\` MUST EXACTLY equal the placeholder token (e.g. \`{{account_id}}\` → \`name: account_id\`;
+    do not use account, accountId, or account-id).
+  • Use \`type: string\` and \`required: true\`, placed under \`interface_parameters.section.source\`.
+  • Keep every \`{{placeholder}}\` reference in the steps intact, and leave all other parameters
+    (e.g. client_id, client_secret) exactly as they were — same name and same type.`;
 
 export function buildSystemPrompt(currentYaml: string): string {
   const trimmed = currentYaml.trim();

@@ -15,9 +15,12 @@ import {
   BadgeSize,
   AlertBannerType,
   AlertBannerVariant,
+  ToastController,
+  AlertToastType,
 } from '@boomi/exosphere';
 import { useConnectorDispatch } from '../../context/ConnectorContext';
 import { useChatDispatch } from '../../chat/ChatContext';
+import { useLayout } from '../../layout/LayoutContext';
 import { applyYamlText } from '../../hooks/useYamlSync';
 import { yamlToConfig } from '../../engine/yamlSync';
 
@@ -29,6 +32,7 @@ interface ChatProposalProps {
 export default function ChatProposal({ messageId, yaml }: ChatProposalProps) {
   const connectorDispatch = useConnectorDispatch();
   const chatDispatch = useChatDispatch();
+  const { showEditor } = useLayout();
   const previewRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | undefined>(undefined);
   const [applied, setApplied] = useState(false);
@@ -69,6 +73,13 @@ export default function ChatProposal({ messageId, yaml }: ChatProposalProps) {
   const handleApply = () => {
     applyYamlText(connectorDispatch, yaml);
     setApplied(true);
+    // Any prior test results are now stale — return the middle panel to the editor so the user
+    // sees the new YAML and can re-run the test.
+    showEditor();
+    ToastController.show({
+      type: AlertToastType.SUCCESS,
+      description: 'Blueprint YAML updated in the editor.',
+    });
   };
 
   const handleDismiss = () => {

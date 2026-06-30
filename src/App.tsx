@@ -78,6 +78,7 @@ function AppContent() {
     setIsWide,
     setFormWidth,
     setAiWidth,
+    showEditorNonce,
   } = useLayout();
   const [bottomPanelHeight, setBottomPanelHeight] = useState(() =>
     Math.round(window.innerHeight * 0.5),
@@ -90,6 +91,12 @@ function AppContent() {
     document.documentElement.classList.remove('ex-theme-dark');
     document.documentElement.classList.add('ex-theme-light');
   }, []);
+
+  // When the AI's "Apply to editor" runs, the current test results are stale (the YAML changed),
+  // so leave Test mode and show the editor with the freshly-applied YAML. Guard the initial 0.
+  useEffect(() => {
+    if (showEditorNonce > 0) setIsTestMode(false);
+  }, [showEditorNonce]);
 
   useEffect(() => {
     const container = containerRef.current;

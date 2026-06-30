@@ -388,6 +388,20 @@ ex-resize-handle + .ai-side-panel {
   margin-top: var(--exo-spacing-x-small);
 }
 
+/* "Fix with AI" affordance under a failed report's error banner. */
+.report-error-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--exo-spacing-small);
+  flex-wrap: wrap;
+  margin-top: var(--exo-spacing-small);
+}
+
+.report-error-hint {
+  font-size: var(--exo-font-size-x-small);
+  color: var(--exo-color-font-secondary);
+}
+
 .raw-response {
   font-family: var(--exo-font-family-mono, ui-monospace, Menlo, monospace);
   font-size: var(--exo-font-size-x-small);
@@ -521,6 +535,14 @@ ex-accordion + ex-accordion {
   justify-content: center;
   padding: var(--exo-spacing-2x-large) var(--exo-spacing-large);
   width: 100%;
+}
+
+/* Two stacked actions in the test-panel empty state (primary test + demo entry). */
+.empty-state-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--exo-spacing-x-small);
 }
 
 /* ==============================

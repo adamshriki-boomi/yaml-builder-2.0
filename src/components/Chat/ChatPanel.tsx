@@ -20,6 +20,7 @@ import {
   ButtonFlavor,
 } from '@boomi/exosphere';
 import { useChatState, useChatDispatch } from '../../chat/ChatContext';
+import { useLayout } from '../../layout/LayoutContext';
 import ChatBody from './ChatBody';
 
 const MIN_HEIGHT_PX = 160;
@@ -36,6 +37,7 @@ export default function ChatPanel() {
   const [shimmer, setShimmer] = useState(false);
   const { messages } = useChatState();
   const chatDispatch = useChatDispatch();
+  const { revealNonce } = useLayout();
 
   // Nudge: sweep an Exosphere-color gradient through the title to draw the eye. Plays on
   // every load (no persistence) while the drawer is collapsed — 3 times, 3s each, 10s
@@ -71,6 +73,14 @@ export default function ChatPanel() {
   };
 
   const toggleCollapsed = () => (collapsed ? open() : setCollapsed(true));
+
+  // Expand when something (e.g. the "Fix with AI" button) asks to reveal the assistant. Skip the
+  // initial 0 so the drawer keeps its default-collapsed first paint.
+  useEffect(() => {
+    if (revealNonce > 0) open();
+    // open() uses functional/state setters and a ref, so a stale closure is harmless here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealNonce]);
 
   const handleHeaderKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {

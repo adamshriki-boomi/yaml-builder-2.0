@@ -10,14 +10,18 @@ import {
   AccordionVariant,
   ButtonType,
   ButtonFlavor,
+  ButtonSize,
   SegmentPlace,
 } from '@boomi/exosphere';
 import ReportResultRow from './ReportResultRow';
-import type { TestRunResult } from '../../types/connector';
+import type { ReportTestResult, TestRunResult } from '../../types/connector';
 
 interface Props {
   result: TestRunResult;
   onReRun: () => void;
+  onFixWithAI?: (report: ReportTestResult) => void;
+  onFixAll?: (reports: ReportTestResult[]) => void;
+  fixDisabled?: boolean;
 }
 
 type Filter = 'all' | 'passed' | 'failed';
@@ -27,10 +31,11 @@ function formatDuration(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-export default function TestResults({ result, onReRun }: Props) {
+export default function TestResults({ result, onReRun, onFixWithAI, onFixAll, fixDisabled }: Props) {
   const total = result.reports.length;
-  const passed = result.reports.filter(r => r.status === 'passed').length;
-  const failed = total - passed;
+  const failedReports = result.reports.filter(r => r.status === 'failed');
+  const passed = total - failedReports.length;
+  const failed = failedReports.length;
 
   const [filter, setFilter] = useState<Filter>('all');
 
@@ -58,6 +63,18 @@ export default function TestResults({ result, onReRun }: Props) {
       <div className="test-results-banner">
         <ExAlertBanner type={bannerType} variant={AlertBannerVariant.INLINE} open hideClose>
           {bannerLine}
+          {onFixAll && failed > 0 && (
+            <ExButton
+              slot="button"
+              type={ButtonType.PRIMARY}
+              flavor={ButtonFlavor.BRANDED}
+              size={ButtonSize.SMALL}
+              disabled={fixDisabled}
+              onClick={() => onFixAll(failedReports)}
+            >
+              {failed > 1 ? 'Fix all errors with AI' : 'Fix with AI'}
+            </ExButton>
+          )}
         </ExAlertBanner>
       </div>
 
@@ -93,7 +110,12 @@ export default function TestResults({ result, onReRun }: Props) {
       ) : (
         <ExAccordion variant={AccordionVariant.FLAT} allowMultiple>
           {visibleReports.map(report => (
-            <ReportResultRow key={report.reportName} result={report} />
+            <ReportResultRow
+              key={report.reportName}
+              result={report}
+              onFixWithAI={onFixWithAI}
+              fixDisabled={fixDisabled}
+            />
           ))}
         </ExAccordion>
       )}
